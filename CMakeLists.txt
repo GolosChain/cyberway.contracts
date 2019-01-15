@@ -41,6 +41,7 @@ add_subdirectory(cyber.msig)
 add_subdirectory(cyber.wrap)
 add_subdirectory(cyber.system)
 add_subdirectory(cyber.token)
+add_subdirectory(cyber.domain)
 
 if (APPLE)
    set(OPENSSL_ROOT "/usr/local/opt/openssl")

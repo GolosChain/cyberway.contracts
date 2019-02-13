@@ -27,6 +27,11 @@ using mvo = fc::mutable_variant_object;
 #endif
 
 
+namespace eosio { namespace chain { namespace config {
+    static const auto token_name = token_account_name;   // earlier token_name used from cyber::config. TODO: remove dependence from contract's common.hpp
+}}}
+
+
 namespace cyber_system {
 
 class cyber_system_tester : public TESTER {

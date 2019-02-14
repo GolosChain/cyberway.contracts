@@ -496,7 +496,7 @@ BOOST_FIXTURE_TEST_CASE( claim_tests, cyber_token_tester ) try {
        ("payments", asset::from_string("0 CERO"))
     );
 
-    transfer( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
+    transfernn( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
 
     alice_balance = get_account(N(alice), "0,CERO");
     REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
@@ -524,10 +524,6 @@ BOOST_FIXTURE_TEST_CASE( claim_tests, cyber_token_tester ) try {
 
     BOOST_REQUIRE_EQUAL( wasm_assert_msg( "not found object account" ),
                          claim( N(carol),  asset::from_string("10 CERO") )
-    );
-
-    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "symbol precision mismatch" ),
-                         claim( N(bob),  asset::from_string("10 TEST") )
     );
 
     BOOST_REQUIRE_EQUAL( wasm_assert_msg( "insufficient funds" ),

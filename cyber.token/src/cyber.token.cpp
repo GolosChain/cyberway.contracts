@@ -231,7 +231,7 @@ void token::claim( name owner, asset quantity )
 
    accounts owner_acnts( _self, owner.value );
    auto account = owner_acnts.find( quantity.symbol.code().raw() );
-   eosio_assert( account == owner_acnts.end(), "not found object account" );
+   eosio_assert( account != owner_acnts.end(), "not found object account" );
    eosio_assert( quantity.symbol == account->payments.symbol, "symbol precision mismatch" );
    eosio_assert( account->payments >= quantity, "insufficient funds" );
    owner_acnts.modify( account, owner, [&]( auto& a ) {

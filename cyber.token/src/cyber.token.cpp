@@ -103,31 +103,22 @@ void token::transfer( name    from,
                       asset   quantity,
                       string  memo )
 {
-    eosio_assert( from != to, "cannot transfer to self" );
-    require_auth( from );
-    eosio_assert( is_account( to ), "to account does not exist");
-    auto sym = quantity.symbol.code();
-    stats statstable( _self, sym.raw() );
-    const auto& st = statstable.get( sym.raw() );
-
-    require_recipient( from );
-    require_recipient( to );
-
-    eosio_assert( quantity.is_valid(), "invalid quantity" );
-    eosio_assert( quantity.amount > 0, "must transfer positive quantity" );
-    eosio_assert( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
-    eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
-
-    auto payer = has_auth( to ) ? to : from;
-
-    sub_balance( from, quantity );
-    add_balance( to, quantity, payer );
+    private_transfer(from, to, quantity, memo);
 }
 
 void token::payment( name    from,
                      name    to,
                      asset   quantity,
                      string  memo )
+{
+    private_transfer(from, to, quantity, memo, true);
+}
+
+void token::private_transfer( name  from,
+                              name  to,
+                              const asset& quantity,
+                              const string& memo,
+                              bool payment )
 {
     eosio_assert( from != to, "cannot transfer to self" );
     require_auth( from );
@@ -144,7 +135,14 @@ void token::payment( name    from,
     auto payer = has_auth( to ) ? to : from;
 
     sub_balance( from, quantity );
-    add_payment( to, quantity, payer );
+    if (payment)
+        add_payment( to, quantity, payer );
+    else {
+        require_recipient( from );
+        require_recipient( to );
+
+        add_balance( to, quantity, payer );
+    }
 }
 
 void token::sub_balance( name owner, asset value ) {

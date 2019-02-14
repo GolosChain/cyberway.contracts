@@ -103,5 +103,11 @@ namespace eosio {
 
          void send_currency_event(const currency_stats& stat);
          void send_balance_event(name acc, const account& accinfo);
+
+         void private_transfer( name    from,
+                                name    to,
+                                const asset& quantity,
+                                const string& memo,
+                                bool payment = false);
    };
 } /// namespace eosio

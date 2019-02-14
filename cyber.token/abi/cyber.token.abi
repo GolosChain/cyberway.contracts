@@ -189,7 +189,7 @@
             "type": "transfer"
         },
         {
-            "name": "transfernn",
+            "name": "payment",
             "type": "transfer"
         },
         {

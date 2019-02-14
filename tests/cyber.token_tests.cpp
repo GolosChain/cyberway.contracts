@@ -100,11 +100,11 @@ public:
       );
    }
 
-   action_result transfernn( account_name from,
+   action_result payment( account_name from,
                   account_name to,
                   asset        quantity,
                   string       memo ) {
-      return push_action( from, N(transfernn), mvo()
+      return push_action( from, N(payment), mvo()
            ( "from", from)
            ( "to", to)
            ( "quantity", quantity)
@@ -246,7 +246,7 @@ BOOST_FIXTURE_TEST_CASE( issue_tests, cyber_token_tester ) try {
    auto alice_balance = get_account(N(alice), "3,TKN");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
       ("balance", asset::from_string("500.000 TKN"))
-      ("payments", asset::from_string("0 TKN"))
+      ("payments", asset::from_string("0.000 TKN"))
    );
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "quantity exceeds available supply" ),
@@ -281,7 +281,7 @@ BOOST_FIXTURE_TEST_CASE( retire_tests, cyber_token_tester ) try {
    auto alice_balance = get_account(N(alice), "3,TKN");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
       ("balance", asset::from_string("500.000 TKN"))
-      ("payments", asset::from_string("0 TKN"))
+      ("payments", asset::from_string("0.000 TKN"))
    );
 
    BOOST_REQUIRE_EQUAL( success(), retire( N(alice), asset::from_string("200.000 TKN"), "hola" ) );
@@ -294,7 +294,7 @@ BOOST_FIXTURE_TEST_CASE( retire_tests, cyber_token_tester ) try {
    alice_balance = get_account(N(alice), "3,TKN");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
       ("balance", asset::from_string("300.000 TKN"))
-      ("payments", asset::from_string("0 TKN"))
+      ("payments", asset::from_string("0.000 TKN"))
    );
 
    //should fail to retire more than current supply
@@ -316,7 +316,7 @@ BOOST_FIXTURE_TEST_CASE( retire_tests, cyber_token_tester ) try {
    alice_balance = get_account(N(alice), "3,TKN");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
       ("balance", asset::from_string("0.000 TKN"))
-      ("payments", asset::from_string("0 TKN"))
+      ("payments", asset::from_string("0.000 TKN"))
    );
 
    //trying to retire tokens with zero supply
@@ -341,7 +341,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, cyber_token_tester ) try {
    auto alice_balance = get_account(N(alice), "0,CERO");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
       ("balance", asset::from_string("1000 CERO"))
-      ("payments", asset::from_string("0 TKN"))
+      ("payments", asset::from_string("0 CERO"))
    );
 
    transfer( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
@@ -389,7 +389,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_not_notification_tests, cyber_token_tester ) t
       ("payments", asset::from_string("0 CERO"))
    );
 
-   transfernn( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
+   payment( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
 
    alice_balance = get_account(N(alice), "0,CERO");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
@@ -496,7 +496,7 @@ BOOST_FIXTURE_TEST_CASE( claim_tests, cyber_token_tester ) try {
        ("payments", asset::from_string("0 CERO"))
     );
 
-    transfernn( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
+    payment( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
 
     alice_balance = get_account(N(alice), "0,CERO");
     REQUIRE_MATCHING_OBJECT( alice_balance, mvo()

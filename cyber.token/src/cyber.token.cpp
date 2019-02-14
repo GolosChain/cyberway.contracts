@@ -124,10 +124,10 @@ void token::transfer( name    from,
     add_balance( to, quantity, payer );
 }
 
-void token::transfernn( name    from,
-                        name    to,
-                        asset   quantity,
-                        string  memo )
+void token::payment( name    from,
+                     name    to,
+                     asset   quantity,
+                     string  memo )
 {
     eosio_assert( from != to, "cannot transfer to self" );
     require_auth( from );
@@ -144,7 +144,7 @@ void token::transfernn( name    from,
     auto payer = has_auth( to ) ? to : from;
 
     sub_balance( from, quantity );
-    add_balance_nn( to, quantity, payer );
+    add_payment( to, quantity, payer );
 }
 
 void token::sub_balance( name owner, asset value ) {
@@ -177,7 +177,7 @@ void token::add_balance( name owner, asset value, name ram_payer )
    }
 }
 
-void token::add_balance_nn( name owner, asset value, name ram_payer )
+void token::add_payment( name owner, asset value, name ram_payer )
 {
    accounts to_acnts( _self, owner.value );
    auto to = to_acnts.find( value.symbol.code().raw() );
@@ -185,10 +185,12 @@ void token::add_balance_nn( name owner, asset value, name ram_payer )
       to_acnts.emplace( ram_payer, [&]( auto& a ){
         a.balance.symbol = value.symbol;
         a.payments = value;
+        send_balance_event(owner, a);
       });
    } else {
       to_acnts.modify( to, same_payer, [&]( auto& a ) {
         a.payments += value;
+        send_balance_event(owner, a);
       });
    }
 }
@@ -208,6 +210,7 @@ void token::open( name owner, const symbol& symbol, name ram_payer )
    if( it == acnts.end() ) {
       acnts.emplace( ram_payer, [&]( auto& a ){
         a.balance = asset{0, symbol};
+        a.payments = asset{0, symbol};
       });
    }
 }
@@ -237,9 +240,11 @@ void token::claim( name owner, asset quantity )
    owner_acnts.modify( account, owner, [&]( auto& a ) {
        a.balance += quantity;
        a.payments -= quantity;
+
+       send_balance_event(owner, a);
    });
 }
 
 } /// namespace eosio
 
-EOSIO_DISPATCH( eosio::token, (create)(issue)(transfer)(transfernn)(claim)(open)(close)(retire) )
+EOSIO_DISPATCH( eosio::token, (create)(issue)(transfer)(payment)(claim)(open)(close)(retire) )

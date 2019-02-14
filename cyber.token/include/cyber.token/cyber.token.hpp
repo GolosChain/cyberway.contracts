@@ -38,10 +38,10 @@ namespace eosio {
                         string  memo );
 
         [[eosio::action]]
-        void transfernn( name    from,
-                         name    to,
-                         asset   quantity,
-                         string  memo );
+        void payment( name    from,
+                      name    to,
+                      asset   quantity,
+                      string  memo );
 
          [[eosio::action]]
          void claim(name owner , asset quantity);
@@ -99,7 +99,7 @@ namespace eosio {
 
          void sub_balance( name owner, asset value );
          void add_balance( name owner, asset value, name ram_payer );
-         void add_balance_nn( name owner, asset value, name ram_payer );
+         void add_payment( name owner, asset value, name ram_payer );
 
          void send_currency_event(const currency_stats& stat);
          void send_balance_event(name acc, const account& accinfo);

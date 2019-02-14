@@ -346,6 +346,40 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, cyber_token_tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
+BOOST_FIXTURE_TEST_CASE( transfer_not_notification_tests, cyber_token_tester ) try {
+
+   auto token = create( N(alice), asset::from_string("1000 CERO"));
+   produce_blocks(1);
+
+   issue( N(alice), N(alice), asset::from_string("1000 CERO"), "hola" );
+
+   auto stats = get_stats("0,CERO");
+   REQUIRE_MATCHING_OBJECT( stats, mvo()
+      ("supply", asset::from_string("1000 CERO"))
+      ("max_supply", asset::from_string("1000 CERO"))
+      ("issuer", "alice")
+   );
+
+   auto alice_balance = get_account(N(alice), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+      ("balance", asset::from_string("1000 CERO"))
+   );
+
+   transfer( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
+
+   alice_balance = get_account(N(alice), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+      ("balance", asset::from_string("700 CERO"))
+      ("payments", asset::from_string("0 CERO"))
+   );
+
+   auto bob_balance = get_account(N(bob), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
+      ("balance", asset::from_string("0 CERO"))
+      ("payments", asset::from_string("300 CERO"))
+   );
+} FC_LOG_AND_RETHROW()
+
 BOOST_FIXTURE_TEST_CASE( open_tests, cyber_token_tester ) try {
 
    auto token = create( N(alice), asset::from_string("1000 CERO"));

@@ -37,6 +37,12 @@ namespace eosio {
                         asset   quantity,
                         string  memo );
 
+        [[eosio::action]]
+        void transfernn( name    from,
+                         name    to,
+                         asset   quantity,
+                         string  memo );
+
          [[eosio::action]]
          void open( name owner, const symbol& symbol, name ram_payer );
 
@@ -67,6 +73,7 @@ namespace eosio {
       private:
          struct [[eosio::table]] account {
             asset    balance;
+            asset    payments;
 
             uint64_t primary_key()const { return balance.symbol.code().raw(); }
          };

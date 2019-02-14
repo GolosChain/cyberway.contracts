@@ -8,6 +8,10 @@
                 {
                     "name": "balance",
                     "type": "asset"
+                },
+                {
+                    "name": "payments",
+                    "type": "asset"
                 }
             ]
         },
@@ -168,6 +172,10 @@
         },
         {
             "name": "transfer",
+            "type": "transfer"
+        },
+        {
+            "name": "transfernn",
             "type": "transfer"
         }
     ],

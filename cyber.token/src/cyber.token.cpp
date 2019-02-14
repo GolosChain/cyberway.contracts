@@ -124,6 +124,29 @@ void token::transfer( name    from,
     add_balance( to, quantity, payer );
 }
 
+void token::transfernn( name    from,
+                        name    to,
+                        asset   quantity,
+                        string  memo )
+{
+    eosio_assert( from != to, "cannot transfer to self" );
+    require_auth( from );
+    eosio_assert( is_account( to ), "to account does not exist");
+    auto sym = quantity.symbol.code();
+    stats statstable( _self, sym.raw() );
+    const auto& st = statstable.get( sym.raw() );
+
+    eosio_assert( quantity.is_valid(), "invalid quantity" );
+    eosio_assert( quantity.amount > 0, "must transfer positive quantity" );
+    eosio_assert( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
+    eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+
+    auto payer = has_auth( to ) ? to : from;
+
+    sub_balance( from, quantity );
+    add_balance_nn( to, quantity, payer );
+}
+
 void token::sub_balance( name owner, asset value ) {
    accounts from_acnts( _self, owner.value );
 
@@ -143,12 +166,29 @@ void token::add_balance( name owner, asset value, name ram_payer )
    if( to == to_acnts.end() ) {
       to_acnts.emplace( ram_payer, [&]( auto& a ){
         a.balance = value;
+        a.payments.symbol = value.symbol;
         send_balance_event(owner, a);
       });
    } else {
       to_acnts.modify( to, same_payer, [&]( auto& a ) {
         a.balance += value;
         send_balance_event(owner, a);
+      });
+   }
+}
+
+void token::add_balance_nn( name owner, asset value, name ram_payer )
+{
+   accounts to_acnts( _self, owner.value );
+   auto to = to_acnts.find( value.symbol.code().raw() );
+   if( to == to_acnts.end() ) {
+      to_acnts.emplace( ram_payer, [&]( auto& a ){
+        a.balance.symbol = value.symbol;
+        a.payments = value;
+      });
+   } else {
+      to_acnts.modify( to, same_payer, [&]( auto& a ) {
+        a.payments += value;
       });
    }
 }
@@ -184,4 +224,4 @@ void token::close( name owner, const symbol& symbol )
 
 } /// namespace eosio
 
-EOSIO_DISPATCH( eosio::token, (create)(issue)(transfer)(open)(close)(retire) )
+EOSIO_DISPATCH( eosio::token, (create)(issue)(transfer)(transfernn)(open)(close)(retire) )

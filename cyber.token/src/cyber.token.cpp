@@ -103,7 +103,7 @@ void token::transfer( name    from,
                       asset   quantity,
                       string  memo )
 {
-    private_transfer(from, to, quantity, memo);
+    do_transfer(from, to, quantity, memo);
 }
 
 void token::payment( name    from,
@@ -111,10 +111,10 @@ void token::payment( name    from,
                      asset   quantity,
                      string  memo )
 {
-    private_transfer(from, to, quantity, memo, true);
+    do_transfer(from, to, quantity, memo, true);
 }
 
-void token::private_transfer( name  from,
+void token::do_transfer( name  from,
                               name  to,
                               const asset& quantity,
                               const string& memo,

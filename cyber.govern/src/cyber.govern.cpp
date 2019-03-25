@@ -217,11 +217,11 @@ void govern::sum_up(producers& producers_table) {
     for (auto prod_itr = producers_table.begin(); prod_itr != producers_table.end();) {
         if (prod_itr->confirmed_balance < 0) {
             INLINE_ACTION_SENDER(cyber::stake, amerce)(config::stake_name, {config::issuer_name, config::active_name},
-                {prod_itr->account, asset(-prod_itr->confirmed_balance, system_token), symbol_code(0)});
+                {prod_itr->account, asset(-prod_itr->confirmed_balance, system_token)});
         }
         else if (prod_itr->confirmed_balance > 0) {
             INLINE_ACTION_SENDER(cyber::stake, reward)(config::stake_name, {config::issuer_name, config::active_name},
-                {prod_itr->account, asset(prod_itr->confirmed_balance, system_token), symbol_code(0)});
+                {prod_itr->account, asset(prod_itr->confirmed_balance, system_token)});
         }
         
         if (prod_itr->elected || prod_itr->is_active()) {

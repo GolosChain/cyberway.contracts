@@ -13,19 +13,10 @@
                 { "type": "time_point_sec", "name": "last_step"  }
             ]
         },{
-            "name": "purpose_param_struct",
-            "base": "",
-            "fields": [
-                { "type": "symbol_code",    "name": "code"  },
-                { "type": "int64",          "name": "payout_step_lenght"  },
-                { "type": "uint16",         "name": "payout_steps_num"  }
-            ]
-        },{
             "name": "create_args",
             "base": "",
             "fields": [
                 { "type": "symbol",                 "name": "token_symbol" },
-                { "type": "purpose_param_struct[]", "name": "purposes"  },
                 { "type": "uint8[]",                "name": "max_proxies"  },
                 { "type": "int64",                  "name": "frame_length"  },
                 { "type": "int64",                  "name": "payout_step_lenght"  },
@@ -35,8 +26,7 @@
             "name": "enable_args",
             "base": "",
             "fields": [
-                { "type": "symbol",         "name": "token_symbol" },
-                { "type": "symbol_code",    "name": "purpose_code" }
+                { "type": "symbol",         "name": "token_symbol" }
             ]
         },{
             "name": "delegate_args",
@@ -44,8 +34,7 @@
             "fields": [
                 { "type": "name",           "name": "grantor_name" },
                 { "type": "name",           "name": "agent_name"  },
-                { "type": "asset",          "name": "quantity"  },
-                { "type": "symbol_code",    "name": "purpose_code"  }
+                { "type": "asset",          "name": "quantity"  }
             ]
         },{
             "name": "recall_args",
@@ -53,8 +42,7 @@
             "fields": [
                 { "type": "name",           "name": "grantor_name" },
                 { "type": "name",           "name": "agent_name"  },
-                { "type": "symbol_code",    "name": "token_code"  },
-                { "type": "symbol_code",    "name": "purpose_code"  },
+                { "type": "symbol_code",    "name": "token_code"  }
                 { "type": "int16",          "name": "pct"  }
             ]
         },{
@@ -69,16 +57,14 @@
             "base": "",
             "fields": [
                 { "type": "name",           "name": "account" },
-                { "type": "asset",          "name": "quantity"  },
-                { "type": "symbol_code",    "name": "purpose_code"  }
+                { "type": "asset",          "name": "quantity"  }
             ]
         },{
             "name": "claim_args",
             "base": "",
             "fields": [
                 { "type": "name",           "name": "account" },
-                { "type": "symbol_code",    "name": "token_code"  },
-                { "type": "symbol_code",    "name": "purpose_code"  }
+                { "type": "symbol_code",    "name": "token_code"  }
             ]
         },{
             "name": "setproxylvl_args",
@@ -103,8 +89,7 @@
             "base": "",
             "fields": [
                 { "type": "name",           "name": "account" },
-                { "type": "symbol_code",    "name": "token_code"  },
-                { "type": "symbol_code",    "name": "purpose_code"  }
+                { "type": "symbol_code",    "name": "token_code"  }
             ]
         },{
             "name": "setkey_args",

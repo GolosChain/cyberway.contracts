@@ -83,8 +83,10 @@ public:
         );
     }
     
-    action_result setproxylvl(account_name account, symbol_code token_code, uint8_t level) {
-        BOOST_TEST_MESSAGE("--- " << account <<  " sets proxy level");
+    action_result setproxylvl(account_name account, symbol_code token_code, uint8_t level, bool mssg = true) {
+        if (mssg) {
+            BOOST_TEST_MESSAGE("--- " << account <<  " sets proxy level");
+        }
         return push(N(setproxylvl), account, args()
             ("account", account)
             ("token_code", token_code)

@@ -191,20 +191,21 @@ void stake::setgrntterms(name grantor_name, name agent_name, symbol_code token_c
 void stake::on_transfer(name from, name to, asset quantity, std::string memo) {
     if (_self != to || memo == config::reward_memo)
         return;
+    name account = memo.empty() ? from : name(memo);
     auto token_code = quantity.symbol.code();
     params params_table(table_owner, table_owner.value);
     const auto& param = params_table.get(token_code.raw(), "no staking for token");
     
     agents agents_table(table_owner, table_owner.value);
     auto agents_idx = agents_table.get_index<"bykey"_n>();
-    auto agent = get_agent_itr(token_code, agents_idx, from, param.max_proxies.size(), &agents_table);
+    auto agent = get_agent_itr(token_code, agents_idx, account, param.max_proxies.size(), &agents_table);
     
-    update_stake_proxied(token_code, from, param.frame_length, false);
+    update_stake_proxied(token_code, account, param.frame_length, false);
 
     grants grants_table(table_owner, table_owner.value);
     auto grants_idx = grants_table.get_index<"bykey"_n>();
     
-    auto share = delegate_traversal(token_code, agents_idx, grants_idx, from, quantity.amount);
+    auto share = delegate_traversal(token_code, agents_idx, grants_idx, account, quantity.amount);
     agents_idx.modify(agent, name(), [&](auto& a) { a.own_share += share; });
     update_stats(structures::stat {
         .id = 0,

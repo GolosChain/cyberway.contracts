@@ -42,7 +42,7 @@
             "fields": [
                 { "type": "name",           "name": "grantor_name" },
                 { "type": "name",           "name": "agent_name"  },
-                { "type": "symbol_code",    "name": "token_code"  }
+                { "type": "symbol_code",    "name": "token_code"  },
                 { "type": "int16",          "name": "pct"  }
             ]
         },{

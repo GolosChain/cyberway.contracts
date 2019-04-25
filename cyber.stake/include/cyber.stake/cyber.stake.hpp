@@ -169,9 +169,11 @@ public:
         size_t i = 0;
         auto agent_itr = agents_idx.lower_bound(std::make_tuple(token_code, std::numeric_limits<int64_t>::max(), name()));
         while ((agent_itr != agents_idx.end()) && (agent_itr->token_code == token_code) && (agent_itr->votes >= 0) && (i < n)) {
-            ret.emplace_back(std::make_pair(agent_itr->account, agent_itr->signing_key));
+            if (agent_itr->signing_key != public_key{}) {
+                ret.emplace_back(std::make_pair(agent_itr->account, agent_itr->signing_key));
+                ++i;
+            }
             ++agent_itr;
-            ++i;
         }
         return ret;
     }

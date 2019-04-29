@@ -80,6 +80,12 @@ namespace eosio {
             return st.issuer;
          }
 
+         static bool balance_exist( name token_contract_account, name owner, symbol_code sym_code )
+         {
+            accounts accountstable( token_contract_account, owner.value );
+            return accountstable.find( sym_code.raw() ) != accountstable.end();
+         }
+
       private:
          struct [[eosio::table]] account {
             asset    balance;

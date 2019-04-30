@@ -25,6 +25,7 @@ systemAccounts = [
     ('cyber.saving',   False),
     ('cyber.token',    True),
     ('cyber.vpay',     False),
+    ('cyber.worker',   True),
 ]
 
 def jsonArg(a):
@@ -325,12 +326,13 @@ def stepCreateTokens():
     retry(args.cleos + 'push action cyber.token issue \'["cyber", "%s", "memo"]\' -p cyber' % intToCurrency(totalAllocation))
     sleep(1)
 def stepConfigureSystem():
-    retry(args.cleos + 'push action cyber.stake create \'["4,%s", [30, 10, 3, 1], 1800, 43200, 12, 0]\' -p cyber' % (args.symbol))
+    if not args.golos_genesis:
+       retry(args.cleos + 'push action cyber.stake create \'["4,%s", [30, 10, 3, 1], 1800, 43200, 12, 0]\' -p cyber' % (args.symbol))
+    retry(args.cleos + 'push action cyber.stake open \'{"owner":"cyber", "token_code":"%s"}\' -p cyber' % (args.symbol))
+    retry(args.cleos + 'push action cyber.token issue \'{"to":"cyber", "quantity":"500.0000 %s", "memo":""}\' -p cyber' % (args.symbol))
+    retry(args.cleos + 'push action cyber.token transfer \'{"from":"cyber", "to":"cyber.stake", "quantity":"500.0000 %s", "memo":""}\' -p cyber' % (args.symbol))
+    retry(args.cleos + 'push action cyber.stake setminstaked \'{"account":"cyber", "token_code":"%s", "min_own_staked": 500}\' -p cyber' % (args.symbol))
     retry(args.cleos + 'push action cyber.stake setproxylvl \'{"account":"cyber", "token_code":"%s", "level":0}\' -p cyber' % (args.symbol))
-    #retry(args.cleos + 'push action cyber.stake setminstaked \'{"account":"cyber", "token_code":"%s", "min_own_staked": 0}\' -p cyber' % (args.symbol))
-    # Stake half of total supply for guaranteed election to the block producers
-    retry(args.cleos + 'push action cyber.token issue \'["cyber", "500.0000 %s", ""]\' -p cyber' % (args.symbol))
-    retry(args.cleos + 'push action cyber.token transfer \'["cyber", "cyber.stake", "500.0000 %s", ""]\' -p cyber' % (args.symbol))
     retry(args.cleos + 'push action cyber.stake setkey \'{"account":"cyber","token_code":"%s","signing_key":"GLS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"}\' -p cyber' % (args.symbol))
     sleep(1)
 def stepCreateStakedAccounts():

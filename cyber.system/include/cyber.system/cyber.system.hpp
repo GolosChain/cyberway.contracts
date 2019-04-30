@@ -29,28 +29,28 @@ namespace eosiosystem {
    using eosio::microseconds;
    using eosio::datastream;
 
-   struct [[eosio::table, eosio::contract("cyber.system")]] name_bid {
-     name            newname;
-     name            high_bidder;
-     int64_t         high_bid = 0; ///< negative high_bid == closed auction waiting to be claimed
-     time_point      last_bid_time;
+//   struct [[eosio::table, eosio::contract("cyber.system")]] name_bid {
+//     name            newname;
+//     name            high_bidder;
+//     int64_t         high_bid = 0; ///< negative high_bid == closed auction waiting to be claimed
+//     time_point      last_bid_time;
 
-     uint64_t primary_key()const { return newname.value;                    }
-     uint64_t by_high_bid()const { return static_cast<uint64_t>(-high_bid); }
-   };
+//     uint64_t primary_key()const { return newname.value;                    }
+//     uint64_t by_high_bid()const { return static_cast<uint64_t>(-high_bid); }
+//   };
 
-   struct [[eosio::table, eosio::contract("cyber.system")]] bid_refund {
-      name         bidder;
-      asset        amount;
+//   struct [[eosio::table, eosio::contract("cyber.system")]] bid_refund {
+//      name         bidder;
+//      asset        amount;
 
-      uint64_t primary_key()const { return bidder.value; }
-   };
+//      uint64_t primary_key()const { return bidder.value; }
+//   };
 
-   typedef eosio::multi_index< "namebids"_n, name_bid,
-                               indexed_by<"highbid"_n, const_mem_fun<name_bid, uint64_t, &name_bid::by_high_bid>  >
-                             > name_bid_table;
+//   typedef eosio::multi_index< "namebids"_n, name_bid,
+//                               indexed_by<"highbid"_n, const_mem_fun<name_bid, uint64_t, &name_bid::by_high_bid>  >
+//                             > name_bid_table;
 
-   typedef eosio::multi_index< "bidrefunds"_n, bid_refund > bid_refund_table;
+//   typedef eosio::multi_index< "bidrefunds"_n, bid_refund > bid_refund_table;
 
    struct [[eosio::table("global"), eosio::contract("cyber.system")]] eosio_global_state : eosio::blockchain_parameters {
       uint64_t free_ram()const { return max_ram_size - total_ram_bytes_reserved; }
@@ -309,11 +309,11 @@ namespace eosiosystem {
          [[eosio::action]]
          void updtrevision( uint8_t revision );
 
-         [[eosio::action]]
-         void bidname( name bidder, name newname, asset bid );
+//         [[eosio::action]]
+//         void bidname( name bidder, name newname, asset bid );
 
-         [[eosio::action]]
-         void bidrefund( name bidder, name newname );
+//         [[eosio::action]]
+//         void bidrefund( name bidder, name newname );
 
       private:
          // Implementation details:

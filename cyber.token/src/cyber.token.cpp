@@ -120,7 +120,8 @@ void token::do_transfer( name  from,
                               const string& memo,
                               bool payment )
 {
-    eosio_assert( from != to, "cannot transfer to self" );
+    if (!payment)
+        eosio_assert( from != to, "cannot transfer to self" );
     require_auth( from );
     eosio_assert( is_account( to ), "to account does not exist");
     auto sym = quantity.symbol.code();

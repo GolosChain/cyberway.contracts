@@ -3,6 +3,7 @@ add_contract(cyber.system cyber.system ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.sys
 target_include_directories(cyber.system.wasm
    PUBLIC
    ${CMAKE_CURRENT_SOURCE_DIR}/include
+   ${CMAKE_CURRENT_SOURCE_DIR}/../cyber.bios/include
    ${CMAKE_CURRENT_SOURCE_DIR}/../cyber.token/include)
 
 set_target_properties(cyber.system.wasm

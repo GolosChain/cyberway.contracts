@@ -172,11 +172,14 @@ namespace cyber {
             }
          }
 
-       [[eosio::action]]
-       void bidname( name bidder, name newname, eosio::asset bid );
+         [[eosio::action]]
+         void bidname( name bidder, name newname, eosio::asset bid );
 
-       [[eosio::action]]
-       void bidrefund( name bidder, name newname );
+         [[eosio::action]]
+         void bidrefund( name bidder, name newname );
+
+         [[eosio::action]]
+         void biderase(name creator, name newact, name sender);
 
          struct [[eosio::table]] abi_hash {
             name              owner;

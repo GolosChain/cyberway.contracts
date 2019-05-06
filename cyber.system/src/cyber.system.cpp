@@ -1,4 +1,5 @@
 #include <cyber.system/cyber.system.hpp>
+#include <cyber.bios/cyber.bios.hpp>
 #include <eosiolib/dispatcher.hpp>
 #include <eosiolib/crypto.h>
 
@@ -131,80 +132,6 @@ namespace eosiosystem {
       _gstate2.revision = revision;
    }
 
-//   void system_contract::bidname( name bidder, name newname, asset bid ) {
-//      require_auth( bidder );
-//      eosio_assert( newname.suffix() == newname, "you can only bid on top-level suffix" );
-
-//      eosio_assert( (bool)newname, "the empty name is not a valid account name to bid on" );
-//      eosio_assert( (newname.value & 0xFull) == 0, "13 character names are not valid account names to bid on" );
-//      eosio_assert( (newname.value & 0x1F0ull) == 0, "accounts with 12 character names and no dots can be created without bidding required" );
-//      eosio_assert( !is_account( newname ), "account already exists" );
-//      eosio_assert( bid.symbol == core_symbol(), "asset must be system token" );
-//      eosio_assert( bid.amount > 0, "insufficient bid" );
-
-//      INLINE_ACTION_SENDER(eosio::token, transfer)(
-//         token_account, { {bidder, active_permission} },
-//         { bidder, names_account, bid, std::string("bid name ")+ newname.to_string() }
-//      );
-
-//      name_bid_table bids(_self, _self.value);
-//      print( name{bidder}, " bid ", bid, " on ", name{newname}, "\n" );
-//      auto current = bids.find( newname.value );
-//      if( current == bids.end() ) {
-//         bids.emplace( bidder, [&]( auto& b ) {
-//            b.newname = newname;
-//            b.high_bidder = bidder;
-//            b.high_bid = bid.amount;
-//            b.last_bid_time = current_time_point();
-//         });
-//      } else {
-//         eosio_assert( current->high_bid > 0, "this auction has already closed" );
-//         eosio_assert( bid.amount - current->high_bid > (current->high_bid / 10), "must increase bid by 10%" );
-//         eosio_assert( current->high_bidder != bidder, "account is already highest bidder" );
-
-//         bid_refund_table refunds_table(_self, newname.value);
-
-//         auto it = refunds_table.find( current->high_bidder.value );
-//         if ( it != refunds_table.end() ) {
-//            refunds_table.modify( it, same_payer, [&](auto& r) {
-//                  r.amount += asset( current->high_bid, core_symbol() );
-//               });
-//         } else {
-//            refunds_table.emplace( bidder, [&](auto& r) {
-//                  r.bidder = current->high_bidder;
-//                  r.amount = asset( current->high_bid, core_symbol() );
-//               });
-//         }
-
-//         transaction t;
-//         t.actions.emplace_back( permission_level{_self, active_permission},
-//                                 _self, "bidrefund"_n,
-//                                 std::make_tuple( current->high_bidder, newname )
-//         );
-//         t.delay_sec = 0;
-//         uint128_t deferred_id = (uint128_t(newname.value) << 64) | current->high_bidder.value;
-//         cancel_deferred( deferred_id );
-//         t.send( deferred_id, bidder );
-
-//         bids.modify( current, bidder, [&]( auto& b ) {
-//            b.high_bidder = bidder;
-//            b.high_bid = bid.amount;
-//            b.last_bid_time = current_time_point();
-//         });
-//      }
-//   }
-
-//   void system_contract::bidrefund( name bidder, name newname ) {
-//      bid_refund_table refunds_table(_self, newname.value);
-//      auto it = refunds_table.find( bidder.value );
-//      eosio_assert( it != refunds_table.end(), "refund not found" );
-//      INLINE_ACTION_SENDER(eosio::token, transfer)(
-//         token_account, { {names_account, active_permission}, {bidder, active_permission} },
-//         { names_account, bidder, asset(it->amount), std::string("refund bid on name ")+(name{newname}).to_string() }
-//      );
-//      refunds_table.erase( it );
-//   }
-
    /**
     *  Called after a new account is created. This code enforces resource-limits rules
     *  for new accounts as well as new account naming conventions.
@@ -230,12 +157,7 @@ namespace eosiosystem {
          if( has_dot ) { // or is less than 12 characters
             auto suffix = newact.suffix();
             if( suffix == newact ) {
-//               name_bid_table bids(_self, _self.value);
-//               auto current = bids.find( newact.value );
-//               eosio_assert( current != bids.end(), "no active bid for name" );
-//               eosio_assert( current->high_bidder == creator, "only highest bidder can claim" );
-//               eosio_assert( current->high_bid < 0, "auction for name is not closed yet" );
-//               bids.erase( current );
+                INLINE_ACTION_SENDER(cyber::bios, biderase)(system_contract::bios_account, {{_self, system_contract::active_permission}}, {creator, newact, _self});
             } else {
                eosio_assert( creator == suffix, "only suffix may create this account" );
             }
@@ -295,7 +217,7 @@ EOSIO_DISPATCH( eosiosystem::system_contract,
      // native.hpp (newaccount definition is actually in cyber.system.cpp)
      (newaccount)(updateauth)(deleteauth)(linkauth)(unlinkauth)(canceldelay)(onerror)(setabi)
      // cyber.system.cpp
-     (init)(setram)(setramrate)(setparams)(rmvproducer)(updtrevision)/*(bidname)(bidrefund)*/
+     (init)(setram)(setramrate)(setparams)(rmvproducer)(updtrevision)
      // delegate_bandwidth.cpp
      (buyrambytes)(buyram)(sellram)(delegatebw)(undelegatebw)(refund)
      // voting.cpp

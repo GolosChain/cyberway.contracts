@@ -426,6 +426,39 @@
                 {"type": "uint64",         "name": "id"},
                 {"type": "time_point_sec", "name": "last_names_update"}
             ]
+        },
+        {
+            "name": "bidname",
+            "base": "",
+            "fields": [
+                {"type": "name",  "name": "bidder"},
+                {"type": "name",  "name": "newname"},
+                {"type": "asset", "name": "bid"}
+            ]
+        },
+        {
+            "name": "bidrefund",
+            "base": "",
+            "fields": [
+                {"type": "name",  "name": "bidder"},
+                {"type": "name",  "name": "newname"}
+            ]
+        },
+        {
+            "name": "biderase",
+            "base": "",
+            "fields": [
+                {"type": "name",  "name": "creator"},
+                {"type": "name",  "name": "newact"},
+                {"type": "name",  "name": "sender"}
+            ]
+        },
+        {
+            "name": "modifybid",
+            "base": "",
+            "fields": [
+                {"type": "name",  "name": "sender"}
+            ]
         }
     ],
     "types": [],
@@ -489,6 +522,22 @@
         {
             "name": "requestbw",
             "type": "requestbw"
+        },
+        {
+            "name": "bidname",
+            "type": "bidname"
+        },
+        {
+            "name": "bidrefund",
+            "type": "bidrefund"
+        },
+        {
+            "name": "biderase",
+            "type": "biderase"
+        },
+        {
+            "name": "modifybid",
+            "type": "modifybid"
         }
     ],
     "tables": [

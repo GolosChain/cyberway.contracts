@@ -109,6 +109,19 @@ void bios::biderase(name creator, name newact, name sender) {
     eosio_assert( current->high_bid < 0, "auction for name is not closed yet" );
     bids.erase( current );
 }
+
+
+void bios::modifybid(name sender) {
+    require_auth( sender );
+
+    name_bid_table bids(_self, _self.value);
+    auto idx = bids.get_index<"highbid"_n>();
+    auto highest = idx.lower_bound( std::numeric_limits<uint64_t>::max()/2 );
+
+    idx.modify( highest, same_payer, [&]( auto& b ){
+        b.high_bid = -b.high_bid;
+    });
+}
 }
 
-EOSIO_DISPATCH( cyber::bios, (setglimits)(setprods)(setparams)(reqauth)(setabi)(setcode)(onblock)(bidname)(bidrefund)(biderase) )
+EOSIO_DISPATCH( cyber::bios, (setglimits)(setprods)(setparams)(reqauth)(setabi)(setcode)(onblock)(bidname)(bidrefund)(biderase)(modifybid) )

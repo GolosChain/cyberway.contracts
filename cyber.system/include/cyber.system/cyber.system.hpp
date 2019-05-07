@@ -171,7 +171,6 @@ namespace eosiosystem {
 
       public:
          static constexpr eosio::name active_permission{"active"_n};
-         static constexpr eosio::name bios_account{"cyber"_n};
          static constexpr eosio::name token_account{"cyber.token"_n};
          static constexpr eosio::name ram_account{"cyber.ram"_n};
          static constexpr eosio::name ramfee_account{"cyber.ramfee"_n};

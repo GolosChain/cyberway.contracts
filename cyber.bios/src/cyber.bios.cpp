@@ -172,4 +172,4 @@ void bios::newaccount(name creator, name newact, ignore<authority> owner, ignore
 
 }
 
-EOSIO_DISPATCH( cyber::bios, (setglimits)(setprods)(setparams)(reqauth)(setabi)(setcode)(onblock)(bidname)(bidrefund) )
+EOSIO_DISPATCH( cyber::bios, (newaccount)(setglimits)(setprods)(setparams)(reqauth)(setabi)(setcode)(onblock)(bidname)(bidrefund) )

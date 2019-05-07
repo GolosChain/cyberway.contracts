@@ -157,7 +157,7 @@ namespace eosiosystem {
          if( has_dot ) { // or is less than 12 characters
             auto suffix = newact.suffix();
             if( suffix == newact ) {
-                INLINE_ACTION_SENDER(cyber::bios, biderase)(system_contract::bios_account, {{_self, system_contract::active_permission}}, {creator, newact, _self});
+//                INLINE_ACTION_SENDER(cyber::bios, biderase)(system_contract::bios_account, {{_self, system_contract::active_permission}}, {creator, newact, _self});
             } else {
                eosio_assert( creator == suffix, "only suffix may create this account" );
             }

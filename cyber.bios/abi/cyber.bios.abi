@@ -443,22 +443,6 @@
                 {"type": "name",  "name": "bidder"},
                 {"type": "name",  "name": "newname"}
             ]
-        },
-        {
-            "name": "biderase",
-            "base": "",
-            "fields": [
-                {"type": "name",  "name": "creator"},
-                {"type": "name",  "name": "newact"},
-                {"type": "name",  "name": "sender"}
-            ]
-        },
-        {
-            "name": "modifybid",
-            "base": "",
-            "fields": [
-                {"type": "name",  "name": "sender"}
-            ]
         }
     ],
     "types": [],
@@ -530,14 +514,6 @@
         {
             "name": "bidrefund",
             "type": "bidrefund"
-        },
-        {
-            "name": "biderase",
-            "type": "biderase"
-        },
-        {
-            "name": "modifybid",
-            "type": "modifybid"
         }
     ],
     "tables": [

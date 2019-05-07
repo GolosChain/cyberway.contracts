@@ -94,7 +94,7 @@ namespace cyber {
          void newaccount( name             creator,
                           name             name,
                           ignore<authority> owner,
-                          ignore<authority> active){}
+                          ignore<authority> active);
 
 
          [[eosio::action]]
@@ -178,12 +178,6 @@ namespace cyber {
          [[eosio::action]]
          void bidrefund( name bidder, name newname );
 
-         [[eosio::action]]
-         void biderase(name creator, name newact, name sender);
-
-         [[eosio::action]]
-         void modifybid( name sender );
-
          struct [[eosio::table]] abi_hash {
             name              owner;
             capi_checksum256  hash;
@@ -196,15 +190,6 @@ namespace cyber {
          
          [[eosio::action]] void onblock(ignore<block_header> header);
 
-         static inline std::tuple<bool, name_bid> get_highest( name contract ) {
-             name_bid_table bids(contract, contract.value);
-             auto idx = bids.get_index<"highbid"_n>();
-             auto it = idx.lower_bound( std::numeric_limits<uint64_t>::max()/2 );
-             if ( it != idx.end() )
-                return {true, *it};
-
-             return {false, name_bid()};
-         }
    };
 
 } /// namespace cyber

@@ -1,5 +1,4 @@
 #include <cyber.system/cyber.system.hpp>
-#include <cyber.bios/cyber.bios.hpp>
 #include <eosiolib/dispatcher.hpp>
 #include <eosiolib/crypto.h>
 

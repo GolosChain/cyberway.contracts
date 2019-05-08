@@ -63,7 +63,7 @@ namespace cyber {
 
    class [[eosio::contract("cyber.bios")]] bios : public contract {
       struct [[eosio::table("state")]] state_info {
-         time_point_sec last_names_update;
+         time_point_sec last_close_bid;
       };
       using state_singleton = eosio::singleton<"biosstate"_n, state_info>;
 

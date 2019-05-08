@@ -424,7 +424,7 @@
             "base": "",
             "fields": [
                 {"type": "uint64",         "name": "id"},
-                {"type": "time_point_sec", "name": "last_names_update"}
+                {"type": "time_point_sec", "name": "last_close_bid"}
             ]
         },
         {

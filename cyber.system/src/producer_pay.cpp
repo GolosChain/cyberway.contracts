@@ -1,6 +1,5 @@
 #include <cyber.system/cyber.system.hpp>
 #include <cyber.token/cyber.token.hpp>
-#include <cyber.bios/cyber.bios.hpp>
 
 namespace eosiosystem {
 
@@ -50,10 +49,9 @@ namespace eosiosystem {
          });
       }
 
-      /// only update block producers once every minute, block_timestamp is in half seconds
-//      if( timestamp.slot - _gstate.last_producer_schedule_update.slot > 120 ) {
-//          update_elected_producers( timestamp );
-
+//      / only update block producers once every minute, block_timestamp is in half seconds
+      if( timestamp.slot - _gstate.last_producer_schedule_update.slot > 120 ) {
+          update_elected_producers( timestamp );
 //          if( (timestamp.slot - _gstate.last_name_close.slot) > blocks_per_day ) {
 //              name_bid_table bids(_self, _self.value);
 //              auto idx = bids.get_index<"highbid"_n>();
@@ -70,7 +68,7 @@ namespace eosiosystem {
 //                  });
 //              }
 //          }
-//      }
+      }
    }
 
    using namespace eosio;

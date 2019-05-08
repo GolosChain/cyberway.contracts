@@ -49,13 +49,15 @@ void bios::onblock(ignore<block_header> header) {
             auto highest = idx.lower_bound( std::numeric_limits<uint64_t>::max()/2 );
             if( highest != idx.end() && highest->high_bid > 0 &&
                 (microseconds(current_time()) - highest->last_bid_time.time_since_epoch()) > microseconds(min_time_from_last_bid)) {
+                s.last_close_bid = tnow;
                 idx.modify( highest, same_payer, [&]( auto& b ){
                     b.high_bid = -b.high_bid;
                 });
             }
-            s.last_close_bid = tnow;
             state.set(s, _self);
         }
+    } else {
+        state.set(s, _self);
     }
 }
 

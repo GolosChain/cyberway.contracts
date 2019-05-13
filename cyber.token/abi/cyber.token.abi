@@ -126,6 +126,38 @@
             ]
         },
         {
+            "name": "params_transfer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                },
+                {
+                    "name": "memo",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "bulktransfer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "params",
+                    "type": "params_transfer[]"
+                }
+            ]
+        },
+        {
             "name": "transfer",
             "base": "",
             "fields": [
@@ -183,6 +215,10 @@
         {
             "name": "retire",
             "type": "retire"
+        },
+        {
+            "name": "bulktransfer",
+            "type": "bulktransfer"
         },
         {
             "name": "transfer",

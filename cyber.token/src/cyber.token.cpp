@@ -244,6 +244,12 @@ void token::claim( name owner, asset quantity )
    });
 }
 
+void token::bulktransfer(name from, vector<params_transfer> params)
+{
+    for (auto param : params)
+        do_transfer(from, param.to, param.quantity, param.memo);
+}
+
 } /// namespace eosio
 
 EOSIO_DISPATCH( eosio::token, (create)(issue)(transfer)(payment)(claim)(open)(close)(retire) )

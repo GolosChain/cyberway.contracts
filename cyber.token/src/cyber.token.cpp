@@ -244,10 +244,10 @@ void token::claim( name owner, asset quantity )
    });
 }
 
-void token::bulktransfer(name from, vector<params_transfer> params)
+void token::bulktransfer(name from, vector<recipient> recipients)
 {
-    for (auto param : params)
-        do_transfer(from, param.to, param.quantity, param.memo);
+    for (auto recipient_obj : recipients)
+        do_transfer(from, recipient_obj.to, recipient_obj.quantity, recipient_obj.memo);
 }
 
 } /// namespace eosio

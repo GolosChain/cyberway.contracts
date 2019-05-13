@@ -126,7 +126,7 @@
             ]
         },
         {
-            "name": "params_transfer",
+            "name": "recipient",
             "base": "",
             "fields": [
                 {
@@ -152,8 +152,8 @@
                     "type": "name"
                 },
                 {
-                    "name": "params",
-                    "type": "params_transfer[]"
+                    "name": "recipients",
+                    "type": "recipient[]"
                 }
             ]
         },

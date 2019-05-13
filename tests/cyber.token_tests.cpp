@@ -16,6 +16,13 @@ using namespace std;
 
 using mvo = fc::mutable_variant_object;
 
+struct recipient {
+    name    to;
+    asset   quantity;
+    string  memo;
+};
+FC_REFLECT(recipient, (to)(quantity)(memo))
+
 class cyber_token_tester : public tester {
 public:
 
@@ -97,6 +104,15 @@ public:
            ( "to", to)
            ( "quantity", quantity)
            ( "memo", memo)
+      );
+   }
+
+
+
+   action_result bulk_transfer( account_name from, std::vector<recipient> recipients ) {
+      return push_action( from, N(bulktransfer), mvo()
+           ( "from", from)
+           ( "recipients", recipients)
       );
    }
 
@@ -366,6 +382,49 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, cyber_token_tester ) try {
       transfer( N(alice), N(bob), asset::from_string("-1000 CERO"), "hola" )
    );
 
+
+} FC_LOG_AND_RETHROW()
+
+BOOST_FIXTURE_TEST_CASE( bulk_transfer_tests, cyber_token_tester ) try {
+
+   auto token = create( N(alice), asset::from_string("1000 CERO"));
+   produce_blocks(1);
+
+   issue( N(alice), N(alice), asset::from_string("1000 CERO"), "hola" );
+
+   auto stats = get_stats("0,CERO");
+   REQUIRE_MATCHING_OBJECT( stats, mvo()
+      ("supply", asset_info::from_string("1000 CERO"))
+      ("max_supply", asset_info::from_string("1000 CERO"))
+      ("issuer", "alice")
+   );
+
+   auto alice_balance = get_account(N(alice), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+      ("balance", asset_info::from_string("1000 CERO"))
+      ("payments", asset_info::from_string("0 CERO"))
+   );
+
+   bulk_transfer( N(alice), {{N(bob), asset::from_string("300 CERO"), "hola"},
+                             {N(carol), asset::from_string("200 CERO"), "hola"}} );
+
+   alice_balance = get_account(N(alice), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+      ("balance", asset_info::from_string("500 CERO"))
+      ("payments", asset_info::from_string("0 CERO"))
+   );
+
+   auto bob_balance = get_account(N(bob), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
+      ("balance", asset_info::from_string("300 CERO"))
+      ("payments", asset_info::from_string("0 CERO"))
+   );
+
+   auto carol_balance = get_account(N(carol), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( carol_balance, mvo()
+      ("balance", asset_info::from_string("200 CERO"))
+      ("payments", asset_info::from_string("0 CERO"))
+   );
 
 } FC_LOG_AND_RETHROW()
 

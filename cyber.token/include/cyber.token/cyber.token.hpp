@@ -39,14 +39,14 @@ namespace eosio {
                         asset   quantity,
                         string  memo );
 
-         struct params_transfer {
+         struct recipient {
              name    to;
              asset   quantity;
              string  memo;
          };
 
         [[eosio::action]]
-        void bulktransfer( name from, vector<params_transfer> params );
+        void bulktransfer( name from, vector<recipient> recipients );
 
         [[eosio::action]]
         void payment( name    from,

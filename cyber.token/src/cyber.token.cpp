@@ -252,4 +252,4 @@ void token::bulktransfer(name from, vector<params_transfer> params)
 
 } /// namespace eosio
 
-EOSIO_DISPATCH( eosio::token, (create)(issue)(transfer)(payment)(claim)(open)(close)(retire) )
+EOSIO_DISPATCH( eosio::token, (create)(issue)(transfer)(bulktransfer)(payment)(claim)(open)(close)(retire) )

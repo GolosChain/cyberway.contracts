@@ -103,6 +103,8 @@ void token::transfer( name    from,
                       asset   quantity,
                       string  memo )
 {
+    require_recipient( from );
+    require_recipient( to );
     do_transfer(from, to, quantity, memo);
 }
 
@@ -115,10 +117,10 @@ void token::payment( name    from,
 }
 
 void token::do_transfer( name  from,
-                              name  to,
-                              const asset& quantity,
-                              const string& memo,
-                              bool payment )
+                         name  to,
+                         const asset& quantity,
+                         const string& memo,
+                         bool payment )
 {
     if (!payment)
         eosio_assert( from != to, "cannot transfer to self" );
@@ -138,12 +140,8 @@ void token::do_transfer( name  from,
     sub_balance( from, quantity );
     if (payment)
         add_payment( to, quantity, payer );
-    else {
-        require_recipient( from );
-        require_recipient( to );
-
+    else
         add_balance( to, quantity, payer );
-    }
 }
 
 void token::sub_balance( name owner, asset value ) {
@@ -246,8 +244,19 @@ void token::claim( name owner, asset quantity )
 
 void token::bulktransfer(name from, vector<recipient> recipients)
 {
-    for (auto recipient_obj : recipients)
+    require_recipient(from);
+    vector<name> require_recipients;
+    for (auto recipient_obj : recipients) {
         do_transfer(from, recipient_obj.to, recipient_obj.quantity, recipient_obj.memo);
+
+        auto find_recipient = std::find_if(require_recipients.begin(), require_recipients.end(), [&](const name& name_recipient){
+            return name_recipient.value ==  recipient_obj.to.value;
+        });
+
+        if ( find_recipient == require_recipients.end() )
+            require_recipient(recipient_obj.to);
+            require_recipients.push_back(recipient_obj.to);
+    }
 }
 
 } /// namespace eosio

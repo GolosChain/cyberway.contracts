@@ -426,6 +426,21 @@ BOOST_FIXTURE_TEST_CASE( bulk_transfer_tests, cyber_token_tester ) try {
       ("payments", asset_info::from_string("0 CERO"))
    );
 
+   bulk_transfer( N(alice), {{N(bob), asset::from_string("100 CERO"), "hola"},
+                             {N(bob), asset::from_string("100 CERO"), "hola"}} );
+
+   alice_balance = get_account(N(alice), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+      ("balance", asset_info::from_string("300 CERO"))
+      ("payments", asset_info::from_string("0 CERO"))
+   );
+
+   bob_balance = get_account(N(bob), "0,CERO");
+   REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
+      ("balance", asset_info::from_string("500 CERO"))
+      ("payments", asset_info::from_string("0 CERO"))
+   );
+
 } FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE( transfer_not_notification_tests, cyber_token_tester ) try {

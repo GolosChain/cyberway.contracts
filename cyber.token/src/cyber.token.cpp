@@ -5,6 +5,7 @@
 
 #include <eosiolib/event.hpp>
 #include <cyber.token/cyber.token.hpp>
+#include <set>
 
 namespace eosio {
 
@@ -245,17 +246,10 @@ void token::claim( name owner, asset quantity )
 void token::bulktransfer(name from, vector<recipient> recipients)
 {
     require_recipient(from);
-    vector<name> require_recipients;
+    std::set<name> require_recipients;
     for (auto recipient_obj : recipients) {
         do_transfer(from, recipient_obj.to, recipient_obj.quantity, recipient_obj.memo);
-
-        auto find_recipient = std::find_if(require_recipients.begin(), require_recipients.end(), [&](const name& name_recipient){
-            return name_recipient.value ==  recipient_obj.to.value;
-        });
-
-        if ( find_recipient == require_recipients.end() )
-            require_recipient(recipient_obj.to);
-            require_recipients.push_back(recipient_obj.to);
+        require_recipients.insert(recipient_obj.to);
     }
 }
 

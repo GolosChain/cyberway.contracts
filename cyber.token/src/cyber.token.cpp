@@ -249,7 +249,11 @@ void token::bulktransfer(name from, vector<recipient> recipients)
     std::set<name> require_recipients;
     for (auto recipient_obj : recipients) {
         do_transfer(from, recipient_obj.to, recipient_obj.quantity, recipient_obj.memo);
-        require_recipients.insert(recipient_obj.to);
+
+
+        auto result = require_recipients.insert(recipient_obj.to);
+        if (result.second)
+            require_recipient(recipient_obj.to);
     }
 }
 

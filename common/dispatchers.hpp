@@ -12,15 +12,8 @@ bool bulk_execute_action( eosio::name self, eosio::name code, void (T::*func)(Ar
     auto data = eosio::unpack_action_data<transfer_st>();
 
     for (auto recipient : data.recipients) {
-        std::tuple<std::decay_t<Args>...> args{data.from, recipient.to, recipient.quantity, recipient.memo};
-        eosio::datastream<const char*> ds = eosio::datastream<const char*>(nullptr, 0);
-
-        T inst(self, code, ds);
-        auto f2 = [&]( auto... a ){
-            ((&inst)->*func)( a... );
-        };
-
-        boost::mp11::tuple_apply( f2, args );
+        T inst(self, code, eosio::datastream<const char*>(nullptr, 0));
+        ((&inst)->*func)(data.from, recipient.to, recipient.quantity, recipient.memo);
     }
     return true;
 }

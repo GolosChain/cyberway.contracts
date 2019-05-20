@@ -33,7 +33,6 @@ extern "C" { \
             switch (action) { \
                 EOSIO_DISPATCH_HELPER(TYPE, MEMBERS) \
             } \
-            /* does not allow destructor of thiscontract to run: eosio_exit(0); */ \
         } else if (code == TOKEN.value && action == "transfer"_n.value) { \
             eosio::execute_action(eosio::name(receiver), eosio::name(code), &TYPE::TRANSFER); \
         } else if (code == TOKEN.value && action == "bulktransfer"_n.value) { \

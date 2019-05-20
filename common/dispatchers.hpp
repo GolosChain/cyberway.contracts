@@ -4,7 +4,7 @@
 #include <eosiolib/dispatcher.hpp>
 
 template<typename T, typename... Args>
-bool bulk_execute_action( eosio::name self, eosio::name code, void (T::*func)(Args...) ) {
+bool dispatch_with_transfer_helper( eosio::name self, eosio::name code, void (T::*func)(Args...) ) {
     struct transfer_st {
         eosio::name from;
         std::vector<eosio::token::recipient> recipients;
@@ -29,7 +29,7 @@ extern "C" { \
         } else if (code == TOKEN.value && action == "transfer"_n.value) { \
             eosio::execute_action(eosio::name(receiver), eosio::name(code), &TYPE::TRANSFER); \
         } else if (code == TOKEN.value && action == "bulktransfer"_n.value) { \
-            bulk_execute_action(eosio::name(receiver), eosio::name(code), &TYPE::TRANSFER); \
+            dispatch_with_transfer_helper(eosio::name(receiver), eosio::name(code), &TYPE::TRANSFER); \
         } \
    } \
 } \

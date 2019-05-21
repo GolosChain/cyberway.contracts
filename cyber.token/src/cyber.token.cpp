@@ -246,8 +246,12 @@ void token::claim( name owner, asset quantity )
 void token::bulktransfer(name from, vector<recipient> recipients)
 {
     require_recipient(from);
+    eosio_assert(recipients.size(), "not found recipients");
+
+    symbol temp_symbol = recipients.at(0).quantity.symbol;
     std::set<name> require_recipients;
     for (auto recipient_obj : recipients) {
+        eosio_assert(temp_symbol == recipient_obj.quantity.symbol, "transfer of different tokens is prohibited");
         do_transfer(from, recipient_obj.to, recipient_obj.quantity, recipient_obj.memo);
 
         auto result = require_recipients.insert(recipient_obj.to);

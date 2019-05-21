@@ -108,8 +108,6 @@ public:
       );
    }
 
-
-
    action_result bulk_transfer( account_name from, std::vector<recipient> recipients ) {
       return push_action( from, N(bulktransfer), mvo()
            ( "from", from)
@@ -406,8 +404,12 @@ BOOST_FIXTURE_TEST_CASE( bulk_transfer_tests, cyber_token_tester ) try {
       ("payments", asset_info::from_string("0 CERO"))
    );
 
-   bulk_transfer( N(alice), {{N(bob), asset::from_string("300 CERO"), "hola"},
-                             {N(carol), asset::from_string("200 CERO"), "hola"}} );
+   BOOST_REQUIRE_EQUAL(wasm_assert_msg("not found recipients"), bulk_transfer( N(alice), {}));
+   BOOST_REQUIRE_EQUAL(success(), bulk_transfer( N(alice), {{N(bob), asset::from_string("300 CERO"), "hola"},
+                                                            {N(carol), asset::from_string("200 CERO"), "hola"}} ));
+
+   BOOST_REQUIRE_EQUAL(wasm_assert_msg("transfer of different tokens is prohibited"), bulk_transfer( N(alice), {{N(bob), asset::from_string("300 CERO"), "hola"},
+                                                                                                                {N(carol), asset::from_string("200 ZERO"), "hola"}} ));
 
    alice_balance = get_account(N(alice), "0,CERO");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()

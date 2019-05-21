@@ -221,6 +221,10 @@
             "type": "bulktransfer"
         },
         {
+            "name": "bulkpayment",
+            "type": "bulktransfer"
+        },
+        {
             "name": "transfer",
             "type": "transfer"
         },

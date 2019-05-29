@@ -143,6 +143,9 @@ def updateAuthority(account, permission, parent, keys, accounts):
         'auth': createAuthority(keys, accounts)
     }) + '-p ' + account)
 
+def linkAuthority(account, code, action, permission):
+    retry(args.cleos + 'set action permission %s %s %s %s -p %s'%(account, code, action, permission, account))
+
 def createAuthority(keys, accounts):
     keys.sort()
     accounts.sort()
@@ -311,7 +314,9 @@ def stepStartBoot():
     startNode(0, {'name': 'cyber', 'pvt': args.private_key, 'pub': args.public_key})
     sleep(9)
 def stepInstallSystemContracts():
-    updateAuthority('cyber', 'reward', 'active', [args.public_key], [])
+    updateAuthority('cyber', 'reward', 'active', [], ['cyber.stake@cyber.code'])
+    linkAuthority('cyber', 'cyber.token', 'issue', 'reward')
+    linkAuthority('cyber', 'cyber.token', 'transfer', 'reward')
     if not args.golos_genesis:
         retry(args.cleos + 'set contract cyber.domain ' + args.contracts_dir + 'cyber.domain/')
         retry(args.cleos + 'set contract cyber.token ' + args.contracts_dir + 'cyber.token/')

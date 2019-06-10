@@ -523,8 +523,12 @@ BOOST_FIXTURE_TEST_CASE( bulk_transfer_not_notification_tests, cyber_token_teste
        ("payments", asset_info::from_string("0 CERO"))
     );
 
+    BOOST_REQUIRE_EQUAL(wasm_assert_msg("recipients must not be empty"), bulk_payment( N(alice), {}));
     BOOST_REQUIRE_EQUAL( success(), bulk_payment( N(alice), {{N(bob), asset::from_string("300 CERO"), "hola"},
-                                                            {N(carol), asset::from_string("200 CERO"), "hola"}} ));
+                                                            {N(carol), asset::from_string("200 CERO"), "hola"}} )); 
+    BOOST_REQUIRE_EQUAL(wasm_assert_msg("payment of different tokens is prohibited"), bulk_payment( N(alice), {{N(bob), asset::from_string("300 CERO"), "hola"},
+                                                                                                               {N(carol), asset::from_string("200 ZERO"), "hola"}} ));
+
 
     alice_balance = get_account(N(alice), "0,CERO");
     REQUIRE_MATCHING_OBJECT( alice_balance, mvo()

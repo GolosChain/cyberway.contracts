@@ -107,6 +107,27 @@
                 { "type": "symbol_code",    "name": "token_code"  },
                 { "type": "public_key",     "name": "signing_key"  }
             ]
+        },{
+            "name": "name_int_pair",
+            "base": "",
+            "fields": [
+                { "type": "name",           "name": "first" },
+                { "type": "int64",          "name": "second"  }
+            ]
+        },{
+            "name": "reward_args",
+            "base": "",
+            "fields": [
+                { "type": "name_int_pair[]","name": "rewards" },
+                { "type": "symbol",         "name": "sym"  }
+            ]
+        },{
+            "name": "pick_args",
+            "base": "",
+            "fields": [
+                { "type": "symbol_code",    "name": "token_code" },
+                { "type": "name[]",         "name": "accounts" } 
+            ]
         }
     ],
     "types": [],
@@ -169,7 +190,11 @@
             "ricardian_contract": ""
         },{
             "name": "reward",
-            "type": "withdraw_args",
+            "type": "reward_args",
+            "ricardian_contract": ""
+        },{
+            "name": "pick",
+            "type": "pick_args",
             "ricardian_contract": ""
         }
     ],

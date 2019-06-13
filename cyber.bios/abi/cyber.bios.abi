@@ -38,6 +38,24 @@
             ]
         },
         {
+            "name": "name_bid",
+            "base": "",
+            "fields": [
+                 {"name":"newname",       "type":"name"},
+                 {"name":"high_bidder",   "type":"name"},
+                 {"name":"high_bid",      "type":"int64"},
+                 {"name":"last_bid_time", "type":"time_point"}
+            ]
+        },
+        {
+            "name": "bid_refund",
+            "base": "",
+            "fields": [
+                 {"name":"bidder",        "type":"name"},
+                 {"name":"amount",        "type":"asset"}
+            ]
+        },
+        {
             "name": "blockchain_parameters",
             "base": "",
             "fields": [
@@ -479,6 +497,21 @@
                         {"field": "owner", "order": "asc"}
                     ]
                 }
+            ]
+        },
+        {
+            "name": "namebids",
+            "type": "name_bid",
+            "indexes": [
+                { "name": "primary", "unique": "true",  "orders": [ {"field": "newname",  "order": "asc"}  ] },
+                { "name": "highbid", "unique": "false", "orders": [ {"field": "high_bid", "order": "desc"} ] }
+            ]
+        },
+        {
+            "name": "bidrefunds",
+            "type": "bid_refund",
+            "indexes": [
+                { "name": "primary", "unique": "true",  "orders": [ {"field": "bidder",  "order": "asc"}  ] }
             ]
         },
         {

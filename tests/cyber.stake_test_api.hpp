@@ -149,8 +149,8 @@ public:
     
     action_result reward(account_name issuer, account_name account, asset quantity) {
         return push(N(reward), issuer, args()
-            ("account", account)
-            ("quantity", quantity)
+            ("rewards", std::vector<std::pair<account_name, int64_t> >{std::make_pair(account, quantity.get_amount())})
+            ("sym", quantity.get_symbol())
         );
     }
     
@@ -202,7 +202,6 @@ public:
             ("token_code", token_symbol.to_symbol_code())
             ("account", account)
             ("proxy_level", proxy_level)
-            ("votes", proxy_level ? -1 : balance)
             ("last_proxied_update", last_proxied_update)
             ("balance", balance)
             ("proxied", proxied)
@@ -210,6 +209,17 @@ public:
             ("own_share", own_share)
             ("fee", fee)
             ("min_own_staked", min_own_staked);
+    }
+    
+    int64_t get_total_votes(symbol_code token_code) {
+        int64_t ret = 0;
+        auto all = _tester->get_all_chaindb_rows(name(), 0, N(stake.cand), false);
+        for(auto& v : all) {
+            if (v["token_code"].as<symbol_code>() == token_code) {
+                ret += v["votes"].as<int64_t>();
+            }
+        }
+        return ret;
     }
     
     variant get_stats(symbol token_symbol) {
@@ -226,10 +236,11 @@ public:
         return variant();
     }
     
-    variant make_stats(symbol token_symbol, int64_t total_staked, bool enabled = false, time_point_sec last_reward = time_point_sec()) {
+    variant make_stats(symbol token_symbol, int64_t total_staked, int64_t total_votes, bool enabled = false, time_point_sec last_reward = time_point_sec()) {
         return mvo()
             ("token_code", token_symbol.to_symbol_code())
             ("total_staked", total_staked)
+            ("total_votes", total_votes)
             ("last_reward", last_reward)
             ("enabled", enabled);
     }

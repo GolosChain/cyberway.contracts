@@ -18,11 +18,10 @@ void golos_tester::install_contract(
     set_abi (acc, abi.data(), signer);
     if (produce)
         produce_block();
-    const auto& accnt = _chaindb.get<account_object,by_name>(acc);
+    const auto& accnt = _chaindb.get<account_object>(acc);
     abi_def abi_d;
     BOOST_CHECK_EQUAL(abi_serializer::to_abi(accnt.abi, abi_d), true);
     _abis[acc].set_abi(abi_d, abi_serializer_max_time);
-    _chaindb.add_abi(acc, abi_d);
 };
 
 vector<permission> golos_tester::get_account_permissions(account_name a) {

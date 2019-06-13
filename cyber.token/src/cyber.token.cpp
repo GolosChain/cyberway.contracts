@@ -9,6 +9,11 @@
 
 namespace eosio {
 
+namespace config {
+    static constexpr size_t max_memo_size = 384;
+    static constexpr char memo_error[] = "memo has more than 384 bytes";
+}
+
 void token::send_currency_event(const currency_stats& stat) {
     eosio::event(_self, "currency"_n, stat).send();
 }
@@ -46,7 +51,7 @@ void token::issue( name to, asset quantity, string memo )
 {
     auto sym = quantity.symbol;
     eosio_assert( sym.is_valid(), "invalid symbol name" );
-    eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+    eosio_assert( memo.size() <= config::max_memo_size, config::memo_error );
 
     stats statstable( _self, sym.code().raw() );
     auto existing = statstable.find( sym.code().raw() );
@@ -78,7 +83,7 @@ void token::retire( asset quantity, string memo )
 {
     auto sym = quantity.symbol;
     eosio_assert( sym.is_valid(), "invalid symbol name" );
-    eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+    eosio_assert( memo.size() <= config::max_memo_size, config::memo_error );
 
     stats statstable( _self, sym.code().raw() );
     auto existing = statstable.find( sym.code().raw() );
@@ -134,7 +139,7 @@ void token::do_transfer( name  from,
     eosio_assert( quantity.is_valid(), "invalid quantity" );
     eosio_assert( quantity.amount > 0, "must transfer positive quantity" );
     eosio_assert( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
-    eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+    eosio_assert( memo.size() <= config::max_memo_size, config::memo_error );
 
     auto payer = has_auth( to ) ? to : from;
 
@@ -196,6 +201,7 @@ void token::add_payment( name owner, asset value, name ram_payer )
 void token::open( name owner, const symbol& symbol, name ram_payer )
 {
    require_auth( ram_payer );
+   eosio_assert( is_account( owner ), "owner account does not exist");
 
    auto sym_code_raw = symbol.code().raw();
 

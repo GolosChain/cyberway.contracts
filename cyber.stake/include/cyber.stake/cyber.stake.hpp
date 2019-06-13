@@ -26,6 +26,31 @@ using std::string;
 
 class [[eosio::contract("cyber.stake")]] stake : public eosio::contract {
 struct structures {
+    
+    struct [[eosio::table]] candidate {
+        uint64_t id;
+        symbol_code token_code;
+        name account;
+        time_point_sec latest_pick;
+        int64_t votes = 0;
+        int64_t priority = std::numeric_limits<int64_t>::max();
+        public_key signing_key = {};
+        bool enabled = false;
+        uint64_t primary_key()const { return id; }
+        
+        using key_t = std::tuple<symbol_code, name>;
+        key_t by_key()const { return std::make_tuple(token_code, account); }
+        using votes_key_t = std::tuple<symbol_code, bool, int64_t, name>;
+        using prior_key_t = std::tuple<symbol_code, bool, int64_t, int64_t, name>;
+        votes_key_t by_votes()const { return std::make_tuple(token_code, enabled, votes, account); }
+        prior_key_t by_prior()const { return std::make_tuple(token_code, enabled, priority, votes, account); }
+        
+        void set_votes(int64_t arg, int64_t cur_supply);
+        void pick(int64_t cur_supply);
+        void set_key(public_key arg);
+    private:
+        void update_priority(int64_t cur_supply, bool can_increase);
+    };
 
     struct [[eosio::table]] agent {
         uint64_t id;
@@ -33,7 +58,6 @@ struct structures {
         name account;
         
         uint8_t proxy_level;
-        int64_t votes;
         time_point_sec last_proxied_update;
         int64_t balance = 0;// aka unproxied funds
         int64_t proxied = 0;// proxed funds
@@ -41,20 +65,11 @@ struct structures {
         int64_t own_share = 0;
         int16_t fee = 0;
         int64_t min_own_staked = 0;
-        public_key signing_key = {};
         
         uint64_t primary_key()const { return id; }
         using key_t = std::tuple<symbol_code, name>;
         key_t by_key()const { return std::make_tuple(token_code, account); }
-        using votes_key_t = std::tuple<symbol_code, int64_t, name>;
-        votes_key_t by_votes()const { return std::make_tuple(token_code, votes, account); }
         int64_t get_total_funds()const { return balance + proxied; }
-        void set_balance(int64_t arg) {
-            balance = arg;
-            if (!proxy_level) {
-                votes = balance;
-            }
-        };
      };
  
     struct [[eosio::table]] grant {
@@ -99,6 +114,7 @@ struct structures {
         uint64_t id;
         symbol_code token_code;
         int64_t total_staked;
+        int64_t total_votes;
         time_point_sec last_reward;
         bool enabled = false;
         uint64_t primary_key()const { return id; }
@@ -107,10 +123,16 @@ struct structures {
 
     using agent_id_index = eosio::indexed_by<"agentid"_n, eosio::const_mem_fun<structures::agent, uint64_t, &structures::agent::primary_key> >;
     using agent_key_index = eosio::indexed_by<"bykey"_n, eosio::const_mem_fun<structures::agent, structures::agent::key_t, &structures::agent::by_key> >;
-    using agent_votes_index = eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<structures::agent, structures::agent::votes_key_t, &structures::agent::by_votes> >;
-    using agents = eosio::multi_index<"stake.agent"_n, structures::agent, agent_id_index, agent_key_index, agent_votes_index>;
+    using agents = eosio::multi_index<"stake.agent"_n, structures::agent, agent_id_index, agent_key_index>;
     using agents_idx_t = decltype(agents(table_owner, table_owner.value).get_index<"bykey"_n>());
     
+    using candidate_id_index = eosio::indexed_by<"candidateid"_n, eosio::const_mem_fun<structures::candidate, uint64_t, &structures::candidate::primary_key> >;
+    using candidate_key_index = eosio::indexed_by<"bykey"_n, eosio::const_mem_fun<structures::candidate, structures::candidate::key_t, &structures::candidate::by_key> >;
+    using candidate_votes_index = eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<structures::candidate, structures::candidate::votes_key_t, &structures::candidate::by_votes> >;
+    using candidate_prior_index = eosio::indexed_by<"byprior"_n, eosio::const_mem_fun<structures::candidate, structures::candidate::prior_key_t, &structures::candidate::by_prior> >;
+    using candidates = eosio::multi_index<"stake.cand"_n, structures::candidate, candidate_id_index, candidate_key_index, candidate_votes_index, candidate_prior_index>;
+    using candidates_idx_t = decltype(candidates(table_owner, table_owner.value).get_index<"bykey"_n>());
+
     using grant_id_index = eosio::indexed_by<"grantid"_n, eosio::const_mem_fun<structures::grant, uint64_t, &structures::grant::primary_key> >;
     using grant_key_index = eosio::indexed_by<"bykey"_n, eosio::const_mem_fun<structures::grant, structures::grant::key_t, &structures::grant::by_key> >;
     using grants = eosio::multi_index<"stake.grant"_n, structures::grant, grant_id_index, grant_key_index>;
@@ -125,7 +147,7 @@ struct structures {
     using payout_id_index = eosio::indexed_by<"payoutid"_n, eosio::const_mem_fun<structures::payout, uint64_t, &structures::payout::primary_key> >;
     using payout_acc_index = eosio::indexed_by<"payoutacc"_n, eosio::const_mem_fun<structures::payout, structures::payout::by_account_t, &structures::payout::by_account> >;
     using payouts = eosio::multi_index<"payout"_n, structures::payout, payout_id_index, payout_acc_index>;
-    
+
     void update_stake_proxied(symbol_code token_code, name agent_name) {
         ::update_stake_proxied(token_code.raw(), agent_name.value, static_cast<int>(true));
     }
@@ -134,7 +156,7 @@ struct structures {
     void update_payout(name account, asset quantity, bool claim_mode = false);
 
     //return: share
-    int64_t delegate_traversal(symbol_code token_code, agents_idx_t& agents_idx, grants_idx_t& grants_idx, name agent_name, int64_t amount, bool refill = false);
+    int64_t delegate_traversal(symbol_code token_code, agents_idx_t& agents_idx, grants_idx_t& grants_idx, name agent_name, int64_t amount, std::map<name, int64_t>& votes_changes, bool refill = false);
     
     agents_idx_t::const_iterator get_agent_itr(symbol_code token_code, agents_idx_t& agents_idx, name agent_name);
     void emplace_agent(name account, agents& agents_table, const structures::param& param, name ram_payer);
@@ -158,6 +180,15 @@ struct structures {
     }
     
     template<typename Lambda>
+    static void modify_candidate(name account, symbol_code token_code, Lambda f) {
+        candidates candidates_table(table_owner, table_owner.value);
+        auto cands_idx = candidates_table.get_index<"bykey"_n>();
+        auto cand = cands_idx.find(std::make_tuple(token_code, account));
+        eosio_assert(cand != cands_idx.end(), ("SYSTEM: candidate " + account.to_string() + " doesn't exist").c_str());
+        cands_idx.modify(cand, name(), f);
+    }
+    
+    template<typename Lambda>
     void modify_stat(symbol_code token_code, Lambda f) {
         stats stats_table(table_owner, table_owner.value);
         auto stat = stats_table.find(token_code.raw());
@@ -166,42 +197,87 @@ struct structures {
     }
     
     static void check_grant_terms(const structures::agent& agent, int16_t break_fee, int64_t break_min_own_staked);
+    void set_votes(symbol_code token_code, const std::map<name, int64_t>& votes_changes);
 
 public:
 
     struct elected_t {
-        name account;
-        int64_t votes = 0;
+        name account; 
+        int64_t votes = 0; 
         public_key signing_key = {};
     };
-
-    static inline std::vector<elected_t> get_top(uint16_t n, symbol_code token_code) {
+    
+    static inline std::vector<elected_t> get_top(symbol_code token_code, uint16_t elected_num, uint16_t reserve_num, bool strict = true) {
         staking_exists(token_code);
-        agents agents_table(table_owner, table_owner.value);
-        auto agents_idx = agents_table.get_index<"byvotes"_n>();
-
+        
+        candidates candidates_table(table_owner, table_owner.value);
         std::vector<elected_t> ret;
-        size_t i = 0;
-        auto agent_itr = agents_idx.lower_bound(std::make_tuple(token_code, std::numeric_limits<int64_t>::max(), name()));
-        while ((agent_itr != agents_idx.end()) && (agent_itr->token_code == token_code) && (agent_itr->votes >= 0) && (i < n)) {
-            if (agent_itr->signing_key != public_key{}) {
-                ret.emplace_back(elected_t{agent_itr->account, agent_itr->votes, agent_itr->signing_key});
-                ++i;
+        static constexpr auto maxval = std::numeric_limits<int64_t>::max();
+        
+        {
+            auto cands_idx = candidates_table.get_index<"byvotes"_n>(); 
+            size_t i = 0;
+            auto cands_itr = cands_idx.lower_bound(std::make_tuple(token_code, true, maxval, name()));
+            while ((cands_itr != cands_idx.end()) && (cands_itr->token_code == token_code) && (i < elected_num)) {
+                if (!strict || (cands_itr->signing_key != public_key{})) {
+                    ret.emplace_back(elected_t{cands_itr->account, cands_itr->votes, cands_itr->signing_key});
+                    ++i;
+                }
+                ++cands_itr;
             }
-            ++agent_itr;
         }
+        
+        int64_t elected = ret.size();
+        auto min_votes_of_elected = elected ? ret.back().votes : maxval;
+        
+        {
+            auto cands_idx = candidates_table.get_index<"byprior"_n>(); 
+            size_t i = 0;
+            auto cands_itr = cands_idx.lower_bound(std::make_tuple(token_code, true, 0, maxval, name()));
+            while ((cands_itr != cands_idx.end()) && (cands_itr->token_code == token_code) && (i < reserve_num)) {
+                bool new_one = true;
+                if (cands_itr->votes > min_votes_of_elected) {
+                    new_one = false;
+                }
+                else if (cands_itr->votes == min_votes_of_elected) {
+                    int64_t cur_elected_i = elected - 1;
+                    while ((cur_elected_i >= 0) && (ret[cur_elected_i].votes == cands_itr->votes)) {
+                        if (ret[cur_elected_i].account == cands_itr->account) {
+                            new_one = false;
+                            break;
+                        }
+                        --cur_elected_i;
+                    }
+                }
+                
+                if (new_one) {
+                    if (!strict || (cands_itr->signing_key != public_key{})) {
+                        ret.emplace_back(elected_t{cands_itr->account, cands_itr->votes, cands_itr->signing_key});
+                        ++i;
+                    }
+                }
+                ++cands_itr; 
+            }
+        }
+        
         return ret;
     }
     
-    static inline int64_t get_votes_sum(symbol_code token_code) {
+    static inline int64_t get_votes_sum(symbol_code token_code, size_t limit = 0) {
         staking_exists(token_code);
-        agents agents_table(table_owner, table_owner.value);
-        auto agents_idx = agents_table.get_index<"byvotes"_n>();
+        stats stats_table(table_owner, table_owner.value);
+        if (!limit) {
+            return stats_table.get(token_code.raw(), "stat doesn't exist").total_votes;
+        }
+        candidates candidates_table(table_owner, table_owner.value);
+        auto cands_idx = candidates_table.get_index<"byvotes"_n>(); 
         int64_t ret = 0;
-        auto agent_itr = agents_idx.lower_bound(std::make_tuple(token_code, std::numeric_limits<int64_t>::max(), name()));
-        while ((agent_itr != agents_idx.end()) && (agent_itr->token_code == token_code) && (agent_itr->votes > 0)) {
-            ret += agent_itr->votes;
-            ++agent_itr;
+        size_t i = 0;
+        auto cands_itr = cands_idx.lower_bound(std::make_tuple(token_code, true, std::numeric_limits<int64_t>::max(), name()));
+        while ((cands_itr != cands_idx.end()) && (cands_itr->token_code == token_code) && (i < limit)) {
+            ++i;
+            ++cands_itr;
+            ret += cands_itr->votes;
         }
         return ret;
     }
@@ -235,6 +311,9 @@ public:
     
     [[eosio::action]] void updatefunds(name account, symbol_code token_code);
 
-    [[eosio::action]] void reward(name account, asset quantity);
+    [[eosio::action]] void reward(std::vector<std::pair<name, int64_t> > rewards, symbol sym);
+    
+    [[eosio::action]] void pick(symbol_code token_code, std::vector<name> accounts);
+    
 };
 } /// namespace cyber

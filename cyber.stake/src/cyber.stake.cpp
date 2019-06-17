@@ -168,6 +168,7 @@ void stake::delegate(name grantor_name, name agent_name, asset quantity) {
 }
 
 void stake::recall(name grantor_name, name agent_name, symbol_code token_code, int16_t pct) {
+    require_auth(grantor_name);
     ::recall_stake_proxied(token_code.raw(), grantor_name.value, agent_name.value, pct);
 }
 

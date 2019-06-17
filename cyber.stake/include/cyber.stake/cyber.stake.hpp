@@ -181,6 +181,7 @@ struct structures {
     
     template<typename Lambda>
     static void modify_candidate(name account, symbol_code token_code, Lambda f) {
+        require_auth(account);
         candidates candidates_table(table_owner, table_owner.value);
         auto cands_idx = candidates_table.get_index<"bykey"_n>();
         auto cand = cands_idx.find(std::make_tuple(token_code, account));

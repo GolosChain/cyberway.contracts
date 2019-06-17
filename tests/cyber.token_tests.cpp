@@ -521,15 +521,15 @@ BOOST_FIXTURE_TEST_CASE( bulk_transfer_not_notification_tests, cyber_token_teste
 
     auto stats = get_stats("0,CERO");
     REQUIRE_MATCHING_OBJECT( stats, mvo()
-       ("supply", asset_info::from_string("1000 CERO"))
-       ("max_supply", asset_info::from_string("1000 CERO"))
+       ("supply", "1000 CERO")
+       ("max_supply", "1000 CERO")
        ("issuer", "alice")
     );
 
     auto alice_balance = get_account(N(alice), "0,CERO");
     REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
-       ("balance", asset_info::from_string("1000 CERO"))
-       ("payments", asset_info::from_string("0 CERO"))
+       ("balance", "1000 CERO")
+       ("payments", "0 CERO")
     );
 
     BOOST_REQUIRE_EQUAL(wasm_assert_msg("recipients must not be empty"), bulk_payment( N(alice), {}));
@@ -538,23 +538,22 @@ BOOST_FIXTURE_TEST_CASE( bulk_transfer_not_notification_tests, cyber_token_teste
     BOOST_REQUIRE_EQUAL(wasm_assert_msg("payment of different tokens is prohibited"), bulk_payment( N(alice), {{N(bob), asset::from_string("300 CERO"), "hola"},
                                                                                                                {N(carol), asset::from_string("200 ZERO"), "hola"}} ));
 
-
     alice_balance = get_account(N(alice), "0,CERO");
     REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
-       ("balance", asset_info::from_string("500 CERO"))
-       ("payments", asset_info::from_string("0 CERO"))
+       ("balance", "500 CERO")
+       ("payments", "0 CERO")
     );
 
     auto bob_balance = get_account(N(bob), "0,CERO");
     REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
-       ("balance", asset_info::from_string("0 CERO"))
-       ("payments", asset_info::from_string("300 CERO"))
+       ("balance", "0 CERO")
+       ("payments", "300 CERO")
     );
 
     auto carol_balance = get_account(N(carol), "0,CERO");
     REQUIRE_MATCHING_OBJECT( carol_balance, mvo()
-       ("balance", asset_info::from_string("0 CERO"))
-       ("payments", asset_info::from_string("200 CERO"))
+       ("balance", "0 CERO")
+       ("payments", "200 CERO")
     );
 
     BOOST_REQUIRE_EQUAL( success(), bulk_payment( N(alice), {{N(bob), asset::from_string("100 CERO"), "hola"},
@@ -562,14 +561,14 @@ BOOST_FIXTURE_TEST_CASE( bulk_transfer_not_notification_tests, cyber_token_teste
 
     alice_balance = get_account(N(alice), "0,CERO");
     REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
-       ("balance", asset_info::from_string("300 CERO"))
-       ("payments", asset_info::from_string("0 CERO"))
+       ("balance", "300 CERO")
+       ("payments", "0 CERO")
     );
 
     bob_balance = get_account(N(bob), "0,CERO");
     REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
-       ("balance", asset_info::from_string("0 CERO"))
-       ("payments", asset_info::from_string("500 CERO"))
+       ("balance", "0 CERO")
+       ("payments", "500 CERO")
     );
 
 } FC_LOG_AND_RETHROW()

@@ -116,6 +116,7 @@ namespace eosio {
          struct balance_event {
             name     account;
             asset    balance;
+            asset    payments;
          };
 
          typedef eosio::multi_index< "accounts"_n, account > accounts;

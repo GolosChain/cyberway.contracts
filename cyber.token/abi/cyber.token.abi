@@ -72,6 +72,10 @@
                 {
                     "name": "balance",
                     "type": "asset"
+                },
+                {
+                    "name": "payments",
+                    "type": "asset"
                 }
             ]
         },

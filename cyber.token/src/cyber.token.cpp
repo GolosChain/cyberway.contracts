@@ -19,7 +19,7 @@ void token::send_currency_event(const currency_stats& stat) {
 }
 
 void token::send_balance_event(name acc, const account& accinfo) {
-    balance_event data{acc, accinfo.balance};
+    balance_event data{acc, accinfo.balance, accinfo.payments};
     eosio::event(_self, "balance"_n, data).send();
 }
 

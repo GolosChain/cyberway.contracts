@@ -435,7 +435,7 @@ BOOST_FIXTURE_TEST_CASE( bulk_transfer_tests, cyber_token_tester ) try {
       ("payments", "0 CERO")
    );
 
-   BOOST_REQUIRE_EQUAL(wasm_assert_msg("not found recipients"), bulk_transfer( N(alice), {}));
+   BOOST_REQUIRE_EQUAL(wasm_assert_msg("recipients must not be empty"), bulk_transfer( N(alice), {}));
    BOOST_REQUIRE_EQUAL(success(), bulk_transfer( N(alice), {{N(bob), asset::from_string("300 CERO"), "hola"},
                                                             {N(carol), asset::from_string("200 CERO"), "hola"}} ));
 

@@ -252,7 +252,7 @@ void token::claim( name owner, asset quantity )
 void token::bulktransfer(name from, vector<recipient> recipients)
 {
     require_recipient(from);
-    eosio_assert(recipients.size(), "not found recipients");
+    eosio_assert(recipients.size(), "recipients must not be empty");
 
     symbol temp_symbol = recipients.at(0).quantity.symbol;
     std::set<name> require_recipients;

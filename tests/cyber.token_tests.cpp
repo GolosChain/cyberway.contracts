@@ -151,7 +151,7 @@ public:
                         const string& symbolname ) {
       return push_action( owner, N(close), mvo()
            ( "owner", owner )
-           ( "symbol", "0,CERO" )
+           ( "symbol", symbolname )
       );
    }
 
@@ -623,6 +623,9 @@ BOOST_FIXTURE_TEST_CASE( close_tests, cyber_token_tester ) try {
    auto alice_balance = get_account(N(alice), "0,CERO");
    BOOST_REQUIRE_EQUAL(true, alice_balance.is_null() );
 
+   BOOST_REQUIRE_EQUAL(wasm_assert_msg("Balance row already deleted or never existed. Action won't have any effect."),
+      close(N(alice), "0,CERO"));
+
    BOOST_REQUIRE_EQUAL( success(), issue( N(alice), N(alice), asset::from_string("1000 CERO"), "hola" ) );
 
    alice_balance = get_account(N(alice), "0,CERO");
@@ -631,7 +634,10 @@ BOOST_FIXTURE_TEST_CASE( close_tests, cyber_token_tester ) try {
       ("payments", "0 CERO")
    );
 
-   BOOST_REQUIRE_EQUAL( success(), transfer( N(alice), N(bob), asset::from_string("1000 CERO"), "hola" ) );
+   BOOST_REQUIRE_EQUAL(wasm_assert_msg("Cannot close because the balance is not zero."),
+      close(N(alice), "0,CERO"));
+
+   BOOST_REQUIRE_EQUAL( success(), payment( N(alice), N(bob), asset::from_string("1000 CERO"), "hola" ) );
 
    alice_balance = get_account(N(alice), "0,CERO");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
@@ -639,9 +645,14 @@ BOOST_FIXTURE_TEST_CASE( close_tests, cyber_token_tester ) try {
       ("payments", "0 CERO")
    );
 
-   BOOST_REQUIRE_EQUAL( success(), close( N(alice), "0,CERO" ) );
+   BOOST_REQUIRE_EQUAL( success(),
+       close( N(alice), "0,CERO") );
+
    alice_balance = get_account(N(alice), "0,CERO");
    BOOST_REQUIRE_EQUAL(true, alice_balance.is_null() );
+
+   BOOST_REQUIRE_EQUAL(wasm_assert_msg("Cannot close because account has payments."),
+      close(N(bob), "0,CERO"));
 
 } FC_LOG_AND_RETHROW()
 

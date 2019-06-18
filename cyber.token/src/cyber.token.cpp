@@ -226,6 +226,7 @@ void token::close( name owner, const symbol& symbol )
    auto it = acnts.find( symbol.code().raw() );
    eosio_assert( it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect." );
    eosio_assert( it->balance.amount == 0, "Cannot close because the balance is not zero." );
+   eosio_assert( it->payments.amount == 0, "Cannot close because account has payments." );
    acnts.erase( it );
 }
 

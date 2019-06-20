@@ -619,9 +619,7 @@ void stake::reward(std::vector<std::pair<name, int64_t> > rewards, symbol sym) {
     
     set_votes(token_code, votes_changes);
     
-    INLINE_ACTION_SENDER(eosio::token, issue)(config::token_name, {issuer, config::reward_name}, {issuer, quantity, ""});
-    INLINE_ACTION_SENDER(eosio::token, transfer)(config::token_name, {issuer, config::reward_name},
-        {issuer, _self, quantity, config::reward_memo});
+    INLINE_ACTION_SENDER(eosio::token, issue)(config::token_name, {issuer, config::active_name}, {_self, quantity, config::reward_memo});
 }
 
 void stake::pick(symbol_code token_code, std::vector<name> accounts) {

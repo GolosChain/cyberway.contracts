@@ -61,7 +61,9 @@
         },{
             "name": "checkwin",
             "base": "",
-            "fields": []
+            "fields": [
+                {"type": "name",        "name": "checker"}
+            ]
         },{
             "name": "declarenames",
             "base": "",
@@ -81,8 +83,7 @@
             "base": "",
             "fields": [
                 {"type": "uint64",         "name": "id"},
-                {"type": "time_point_sec", "name": "last_win"},
-                {"type": "time_point_sec", "name": "last_checkwin"}
+                {"type": "time_point_sec", "name": "last_win"}
             ]
         },{
             "name": "domain_bid",

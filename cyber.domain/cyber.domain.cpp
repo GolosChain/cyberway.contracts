@@ -16,7 +16,6 @@ const uint32_t seconds_per_day       = 24 * seconds_per_hour;
 const uint32_t seconds_per_year      = 365 * seconds_per_day;   // note: it's 52*7=364 in eos
 
 // config
-const uint32_t checkwin_interval = seconds_per_hour;
 const uint32_t min_time_from_last_win = seconds_per_day;
 const uint32_t min_time_from_last_bid = seconds_per_day;
 
@@ -32,8 +31,8 @@ symbol core_symbol() {
     return sym;
 }
 
-void domain::checkwin() {
-    require_auth(_self);
+void domain::checkwin(name checker) {
+    require_auth(checker);
     const int64_t now = ::now();                // int64 to prevent overflows (can only happen if something broken)
     auto tnow = time_point_sec(now);
 
@@ -41,12 +40,6 @@ void domain::checkwin() {
     bool exists = state.exists();
     auto s = exists ? state.get() : domain_bid_state{tnow, tnow};
     if (exists) {
-        auto diff = now - s.last_checkwin.utc_seconds;
-        eosio_assert(diff >= 0, "SYSTEM: last_checkwin is in future");  // must be impossible
-        if (diff != checkwin_interval) {
-            eosio_assert(diff > checkwin_interval, "checkwin called too early");
-            print("checkwin delayed\n");
-        }
         if (now - s.last_win.utc_seconds > min_time_from_last_win) {
             domain_bid_tbl bids(_self, _self.value);
             auto idx = bids.get_index<"highbid"_n>();
@@ -61,16 +54,8 @@ void domain::checkwin() {
                 });
             }
         }
-        s.last_checkwin = tnow;
     }
     state.set(s, _self);
-
-    print("schedule next\n");
-    auto sender_id = s.last_checkwin.utc_seconds;
-    transaction tx;
-    tx.actions.emplace_back(action{permission_level(_self, active_permission), _self, "checkwin"_n, std::tuple<>()});
-    tx.delay_sec = checkwin_interval;
-    tx.send(sender_id, _self);
 }
 
 

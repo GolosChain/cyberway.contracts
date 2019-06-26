@@ -4,7 +4,7 @@ include(GNUInstallDirs)
 
 if(EOSIO_ROOT STREQUAL "" OR NOT EOSIO_ROOT)
   if(APPLE)
-    set(EOSIO_ROOT "/usr/local/eosio")
+    set(EOSIO_ROOT "~/opt/eosio")
   else()
     set(EOSIO_ROOT "/opt/eosio")
   endif()

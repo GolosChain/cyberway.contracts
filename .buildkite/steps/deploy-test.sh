@@ -2,10 +2,11 @@
 
 set -euo pipefail
 
-docker volume rm cyberway-mongodb-data || true
-docker volume create --name=cyberway-mongodb-data
-
 cd Docker
+
+docker-compose down
+docker volume rm cyberway-system-mongodb-data || true
+docker volume create --name=cyberway-system-mongodb-data
 
 IMAGETAG=${BUILDKITE_BRANCH:-master}
 

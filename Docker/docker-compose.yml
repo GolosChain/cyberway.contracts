@@ -12,12 +12,12 @@ services:
        timeout: 2s
        retries: 10
     volumes:
-      - cyberway-mongodb-data:/data/db
+      - cyberway-system-mongodb-data:/data/db
     ports:
       - 127.0.0.1:27018:27017
 
 volumes:
- cyberway-mongodb-data:
+ cyberway-system-mongodb-data:
    external: true
 
 networks:

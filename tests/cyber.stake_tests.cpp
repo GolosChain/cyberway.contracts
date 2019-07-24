@@ -749,6 +749,8 @@ BOOST_FIXTURE_TEST_CASE(limits, cyber_stake_tester) try {
     install_contract(config::system_account_name, contracts::bios_wasm(), contracts::bios_abi());
     BOOST_CHECK_EQUAL(success(), bios.set_min_transaction_cpu_usage(500));
     int64_t stake_amount = 50000000000;
+    
+    token.set_billed(1024, 1024);
     stake.set_billed(1500, 1024);
     bios.set_billed(500, 1);
     
@@ -770,7 +772,7 @@ BOOST_FIXTURE_TEST_CASE(limits, cyber_stake_tester) try {
     auto price = res_balance - (stake_amount / 2 + bios.get_account_balance(_whale));
     BOOST_TEST_MESSAGE("price of delegateuse action = " << price);
     BOOST_CHECK_EQUAL(err.not_enough_staked(), stake.delegateuse(_whale, _bob, token.from_amount(stake_amount / 2 + 1)));
-    auto required_stake = price * 2 + initial_res_cost + 1; // 1 due to rounding
+    auto required_stake = price * 2 + initial_res_cost;
     BOOST_CHECK(err.is_insufficient_staked_mssg(stake.delegateuse(_whale, _bob, token.from_amount(stake_amount / 2))));
     BOOST_CHECK(err.is_insufficient_staked_mssg(stake.delegateuse(_whale, _bob, token.from_amount(stake_amount / 2 - required_stake + 1))));
     BOOST_CHECK_EQUAL(success(), stake.delegateuse(_whale, _bob, token.from_amount(stake_amount / 2 - required_stake)));

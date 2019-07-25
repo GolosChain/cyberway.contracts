@@ -778,7 +778,6 @@ BOOST_FIXTURE_TEST_CASE(limits, cyber_stake_tester) try {
     BOOST_CHECK(err.is_insufficient_staked_mssg(stake.delegateuse(_whale, _bob, token.from_amount(stake_amount / 2 - required_stake + delta))));
     BOOST_CHECK_EQUAL(success(), stake.delegateuse(_whale, _bob, token.from_amount(stake_amount / 2 - required_stake - delta)));
     BOOST_CHECK_EQUAL(stake.get_agent(_whale, token._symbol)["provided"], stake_amount - required_stake - delta);
-    BOOST_CHECK_EQUAL(bios.get_account_balance(_whale), delta);
     BOOST_CHECK_EQUAL("explicitly_billed_exception", stake.recalluse(_whale, _alice, token.from_amount(stake_amount / 2)));
     produce_blocks(777);
     BOOST_CHECK_EQUAL(success(), stake.recalluse(_whale, _alice, token.from_amount(stake_amount / 2)));

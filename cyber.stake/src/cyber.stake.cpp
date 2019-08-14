@@ -325,6 +325,16 @@ void stake::setminstaked(name account, symbol_code token_code, int64_t min_own_s
 
 void stake::setkey(name account, symbol_code token_code, public_key signing_key) {
     staking_exists(token_code);
+
+    params params_table(table_owner, table_owner.value);
+    auto min_own_staked_for_election = params_table.get(token_code.raw(), "no staking for token").min_own_staked_for_election;
+
+    agents agents_table(table_owner, table_owner.value);
+    auto agents_idx = agents_table.get_index<"bykey"_n>();
+    auto agent = get_agent_itr(token_code, agents_idx, account);
+    eosio::check(agent->min_own_staked >= min_own_staked_for_election, 
+        "min_own_staked can't be less than min_own_staked_for_election for users with an ultimate level");
+
     modify_candidate(account, token_code, [signing_key](auto& a) { 
         a.signing_key = signing_key;
         a.enabled = signing_key != public_key{};

@@ -1,3 +1,7 @@
+<img width="400" src="../docs/logo.jpg" />  
+
+***  
+
 cyber.msig
 --------
 

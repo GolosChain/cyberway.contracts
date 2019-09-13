@@ -1,7 +1,10 @@
+<img width="400" src="../docs/logo.jpg" />  
+
+***  
+
 cyber.token
 -----------
 
-This eosio contract allows users to create, issue, and manage tokens on
-eosio based blockchains.
+The system smart contract `cyber.token` provides token management functions, generates new tokens and stores information about created tokens and provides an ability to conduct mutual settlements between accounts as well.  
 
-
+More information about this contract can be found [here](https://cyberway.gitbook.io/en/devportal/system_contracts/cyber.token_contract).

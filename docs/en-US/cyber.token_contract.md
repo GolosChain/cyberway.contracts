@@ -21,7 +21,7 @@ The `create` action is applied to create a token to supply it into the system. T
       * token name, consisting of a set of capital letters;    
       * field that specifies a token cost accuracy in the form of decimal places number.  
 
-The `issuer` account is authorized to supply and withdraw tokens from circulation in the system. The `create` action can be executed by the `token` smart contract only. In order to perform this action, the signature of the block producers is required. Use of the `bandwidth` resources (RAM) is charged to the `issuer` account.  
+The `issuer` account is authorized to supply and withdraw tokens from circulation in the system. The `create` action can be executed by the `token` smart contract only. In order to perform this action, the signature of the validators is required. Use of the `bandwidth` resources (RAM) is charged to the `issuer` account.  
 
 ## The issue action 
 The `issue` action is applied to put a token into circulation in the system.  

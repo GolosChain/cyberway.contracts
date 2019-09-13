@@ -31,7 +31,7 @@ The actions `checkwin`, `biddomain`, `biddmrefund` and `newdomain` are used to p
 * the number of domain names purchased at auction during a day should be no more than one;
 * upon completion of auction, a token transfer of the winner is not returned. The winner can take advantage of the following opportunities:
     * to create her/his own domain name using the operation `newdomain` and become its owner;
-    * to create subdomain names from it by adding the «dot» symbol and а name to the domain name on the left (for example, an owner of the domain `golos.io` can create subdomains such as `api.golos.io`, `ws.golos.io` and etc). It should be noted, that in `cyberway` the accaunt names are formed by the same way — by adding parts to the left of word (for example, the names `msig.cyber`, `domain.cyber` can be formed from `cyber`). In this case the only direct inheritance of domain names is allowed. It means that if the owner has created a domain for the second level, a domain for the third level can’t be created (for example, the name `a.msig.cyber` can’t be formed from `cyber`).
+    * to create subdomain names from it by adding the «dot» symbol and а name to the domain name on the left (for example, an owner of the domain `golos.io` can create subdomains such as `api.golos.io`, `ws.golos.io` and etc). It should be noted, that in `cyberway` the account names are formed by the same way — by adding parts to the left of word (for example, the names `msig.cyber`, `domain.cyber` can be formed from `cyber`). In this case the only direct inheritance of domain names is allowed. It means that if the owner has created a domain for the second level, a domain for the third level can’t be created (for example, the name `a.msig.cyber` can’t be formed from `cyber`).
 
 
 > **Note:**  
@@ -93,7 +93,7 @@ The `newdomain` action can be used:
   * to create domain name by a winner of the domain name auction;  
   * to create a sub-domain name by the owner of a direct parent domain.  
 
-The smart contract account `cyber.domain` must be privileged or have a permission to transfer funds from `cyber'.namesaccount` (in case of a refund). Upon completion of this action, the `creator` account becomes the owner of the created domain name.
+The smart contract account `cyber.domain` must be privileged or have a permission to transfer funds from `cyber.namesaccount` (in case of a refund). Upon completion of this action, the `creator` account becomes the owner of the created domain name.
 
 ## Declarations of the names used in transactions  
 It is not enough for one domain name to define a user name. The matter is, the user name is linked to both the owner account and the domain account (usually, it is a smart contract) and has a structure of the form `name@domain`. The domain part defines a scope for the `name`. The accounts with the same name can exist in different scopes. There are several variants that support `username` data and allow a textual representation of a user name to match an account name.  
@@ -223,7 +223,7 @@ The following additional restrictions are introduced:
             users:["one","two","three"]
         }])
 ```
-  * Implemented support for the names like `username@@account` ( a presence of the symbols «@@» in the name means that the right side is not a domain, but the account name). For example, if a transaction converts view names `alice@@token`, `bob@@oken`, `admin@@golos.io`, then the `declareames` declaration will contain the following arguments:
+  * Implemented support for the names like `username@@account` ( a presence of the symbols «@@» in the name means that the right side is not a domain, but the account name). For example, if a transaction converts view names `alice@@token`, `bob@@token`, `admin@@golos.io`, then the `declareames` declaration will contain the following arguments:
 ```
         declarenames([
             {domain:"", account:N(golos.io), users:["admin"]},

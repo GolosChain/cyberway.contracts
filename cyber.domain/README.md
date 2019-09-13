@@ -1,9 +1,9 @@
 <img width="400" src="../docs/logo.jpg" />  
 
 ***  
+[![GitHub](https://img.shields.io/github/license/cyberway/cyberway.contracts.svg)](https://github.com/cyberway/cyberway.contracts/blob/master/LICENSE)
 
-cyber.domain
------------
+# cyber.domain
 
 The system smart contract `cyber.domain` is designed to create and handle domain names, create or delete a link of domain names to accounts, change domain name owners, as well as to handle a purchase of domain names at auction.  
 

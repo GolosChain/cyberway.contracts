@@ -21,8 +21,8 @@ This repository contains contracts that are useful when deploying, managing, and
   * [cyber.token](https://github.com/cyberway/cyberway.contracts/tree/master/cyber.token)
 
 Dependencies:
-* [cyberway v2.0.x](https://github.com/cyberway/cyberway.cdt/releases)
-* [cyberway.cdt v2.0.x](https://github.com/cyberway/cyberway.cdt/releases)
+* [cyberway v2.0.x](https://github.com/cyberway/cyberway/releases)
+* [cyberway.cdt v2.0.x](https://github.com/cyberway/cyberway.cdt/tags)
 
 To build the contracts and the unit tests:
 * First, ensure that your __cyberway__ is compiled to the core symbol for the CyberWay blockchain that intend to deploy to.

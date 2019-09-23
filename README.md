@@ -16,7 +16,7 @@ This repository contains contracts that are useful when deploying, managing, and
   * [cyber.bios](https://github.com/cyberway/cyberway.contracts/tree/master/cyber.bios)
   * [cyber.domain](https://github.com/cyberway/cyberway.contracts/tree/master/cyber.domain)
   * [cyber.govern](https://github.com/cyberway/cyberway.contracts/tree/master/cyber.govern)
-  * [cyber.msig](https://github.com/cyberway/cyberway.contracts/blob/master/cyber.msig)
+  * [cyber.msig](https://github.com/cyberway/cyberway.contracts/tree/master/cyber.msig)
   * [cyber.stake](https://github.com/cyberway/cyberway.contracts/tree/master/cyber.stake)
   * [cyber.token](https://github.com/cyberway/cyberway.contracts/tree/master/cyber.token)
 

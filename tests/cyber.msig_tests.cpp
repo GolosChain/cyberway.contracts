@@ -355,11 +355,10 @@ BOOST_FIXTURE_TEST_CASE( big_transaction, cyber_msig_tester ) try {
    transaction_trace_ptr trace;
    control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
 
-   push_action( N(alice), N(exec), mvo()
-                  ("proposer",      "alice")
-                  ("proposal_name", "first")
-                  ("executer",      "alice")
-   );
+   BOOST_REQUIRE_THROW(push_action( N(alice), N(exec), mvo("proposer",      "alice")
+                                                       ("proposal_name", "first")
+                                                       ("executer",      "alice")),
+                       fc::exception);
 
    // TODO: Cyberway exchange_wasm is compiled for EOS
    return;

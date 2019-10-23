@@ -42,6 +42,8 @@ add_subdirectory(cyber.token)
 add_subdirectory(cyber.domain)
 add_subdirectory(cyber.stake)
 add_subdirectory(cyber.govern)
+add_subdirectory(cyber.rejector)
+add_subdirectory(cyber.incomereject)
 
 if (APPLE)
    set(OPENSSL_ROOT "/usr/local/opt/openssl")

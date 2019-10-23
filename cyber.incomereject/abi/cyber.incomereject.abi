@@ -1,0 +1,10 @@
+{
+    "version": "cyberway::abi/1.1",
+    "structs": [],
+    "types": [],
+    "actions": [],
+    "events": [],
+    "tables": [],
+    "variants": [],
+    "abi_extensions": []
+}

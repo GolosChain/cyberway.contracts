@@ -3,7 +3,7 @@
 ## Purpose of the cyber.token smart contract development  
 The system smart contract `cyber.token` provides token management functions, generates new tokens and stores information about created tokens and provides an ability to conduct mutual settlements between accounts as well.   
 
-The `cyber.token` smart contract includes the following actions: [create](#the-create-action), [issue](#the-issue-action), [retire](#the-retire-action), [transfer](#the-transfer-action), [bulktransfer](#the-bulktransfer-action), [payment](#the-payment-action), [bulkpayment](#the-bulkpayment-action), [claim](#the-claim-action), [open](#the-open-action) и [close](#the-close-action). 
+The `cyber.token` smart contract includes the following actions: [create](#the-create-action), [issue](#the-issue-action), [retire](#the-retire-action), [transfer](#the-transfer-action), [bulktransfer](#the-bulktransfer-action), [payment](#the-payment-action), [bulkpayment](#the-bulkpayment-action), [claim](#the-claim-action), [open](#the-open-action) and [close](#the-close-action). 
 
 ## The create action
 The `create` action is applied to create a token to supply it into the system. This action has the following form:

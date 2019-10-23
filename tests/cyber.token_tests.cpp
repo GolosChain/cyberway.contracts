@@ -258,6 +258,14 @@ BOOST_FIXTURE_TEST_CASE( create_max_decimals, cyber_token_tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
+BOOST_FIXTURE_TEST_CASE( create_not_exist_issuer, cyber_token_tester ) try {
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "issuer account does not exist" ),
+      create( N(notexist), asset::from_string("1000.000 TKN"))
+   );
+
+} FC_LOG_AND_RETHROW()
+
 BOOST_FIXTURE_TEST_CASE( issue_tests, cyber_token_tester ) try {
 
    auto token = create( N(alice), asset::from_string("1000.000 TKN"));

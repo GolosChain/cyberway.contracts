@@ -16,7 +16,7 @@ RUN cd cyberway.contracts \
         -GNinja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/opt/cyberway.contracts/ \
-        -Deosio.cdt_DIR=/opt/cyberway.cdt/lib/cmake/eosio.cdt \
+        -Dcyberway.cdt_DIR=/opt/cyberway.cdt/lib/cmake/cyberway.cdt \
         -DEOSIO_ROOT=/opt/cyberway \
     && cmake --build build --target install
 

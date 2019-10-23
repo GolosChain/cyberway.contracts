@@ -27,6 +27,7 @@ void token::create( name   issuer,
                     asset  maximum_supply )
 {
     require_auth( _self );
+    eosio::check(is_account(issuer), "issuer account does not exist");
 
     auto sym = maximum_supply.symbol;
     eosio::check( sym.is_valid(), "invalid symbol name" );

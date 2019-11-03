@@ -151,72 +151,55 @@
     "actions": [
         {
             "name": "create",
-            "type": "create_args",
-            "ricardian_contract": ""
+            "type": "create_args"
         },{
             "name": "open",
-            "type": "open_args",
-            "ricardian_contract": ""
+            "type": "open_args"
         },{
             "name": "enable",
-            "type": "enable_args",
-            "ricardian_contract": ""
+            "type": "enable_args"
         },{
             "name": "delegatevote",
-            "type": "delegate_args",
-            "ricardian_contract": ""
+            "type": "delegate_args"
         },{
             "name": "setgrntterms",
-            "type": "setterms_args",
-            "ricardian_contract": ""
+            "type": "setterms_args"
         },{
             "name": "recallvote",
-            "type": "recallvote_args",
-            "ricardian_contract": ""
+            "type": "recallvote_args"
         },{
             "name": "withdraw",
-            "type": "withdraw_args",
-            "ricardian_contract": ""
+            "type": "withdraw_args"
         },{
             "name": "setproxylvl",
-            "type": "setproxylvl_args",
-            "ricardian_contract": ""
+            "type": "setproxylvl_args"
         },{
             "name": "setproxyfee",
-            "type": "setproxyfee_args",
-            "ricardian_contract": ""
+            "type": "setproxyfee_args"
         },{
             "name": "setminstaked",
-            "type": "setminstaked_args",
-            "ricardian_contract": ""
+            "type": "setminstaked_args"
         },{
             "name": "setkey",
-            "type": "setkey_args",
-            "ricardian_contract": ""
+            "type": "setkey_args"
         },{
             "name": "updatefunds",
-            "type": "updatefunds_args",
-            "ricardian_contract": ""
+            "type": "updatefunds_args"
         },{
             "name": "reward",
-            "type": "reward_args",
-            "ricardian_contract": ""
+            "type": "reward_args"
         },{
             "name": "pick",
-            "type": "pick_args",
-            "ricardian_contract": ""
+            "type": "pick_args"
         },{
             "name": "delegateuse",
-            "type": "delegate_args",
-            "ricardian_contract": ""
+            "type": "delegate_args"
         },{
             "name": "recalluse",
-            "type": "delegate_args",
-            "ricardian_contract": ""
+            "type": "delegate_args"
         },{
             "name": "claim",
-            "type": "claim_args",
-            "ricardian_contract": ""
+            "type": "claim_args"
         }
     ],
     "tables": [
@@ -238,7 +221,7 @@
             ]
         }
     ],
-    "ricardian_clauses": [],
+    "events": [],
     "variants": [],
     "abi_extensions": []
 }

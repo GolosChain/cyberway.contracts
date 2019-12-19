@@ -1,7 +1,7 @@
 <img width="400" src="./docs/logo.jpg" />  
 
 *****  
-[![buildkite](https://badge.buildkite.com/cbc4061f218d570917e365bfff8a251c03996f43f35f4deb66.svg?branch=master)](https://buildkite.com/cyberway.contracts)
+[![buildkite](https://badge.buildkite.com/f0940b2380542f6c80c1c01aa773d61c1d3470007fa5b9e6c3.svg?branch=master)](https://buildkite.com/cyberway.contracts)
 [![GitHub](https://img.shields.io/github/license/cyberway/cyberway.contracts.svg)](https://github.com/cyberway/cyberway.contracts/blob/master/LICENSE)  
 
 

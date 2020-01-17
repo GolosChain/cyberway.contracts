@@ -545,4 +545,35 @@ BOOST_FIXTURE_TEST_CASE( switch_proposal_and_fail_approve_with_hash, cyber_msig_
    );
 } FC_LOG_AND_RETHROW()
 
+BOOST_FIXTURE_TEST_CASE(propose_with_description, cyber_msig_tester) try {
+   auto trx = reqauth("alice", {permission_level{N(alice), config::active_name}}, abi_serializer_max_time);
+   const name p_name = N(description);
+   push_action(N(alice), N(propose), mvo()
+      ("proposer", "alice")
+      ("proposal_name", p_name)
+      ("trx", trx)
+      ("requested", vector<permission_level>{{ N(alice), config::active_name }})
+      ("description", "Propose to Hello world!")
+   );
+
+   //approve and execute
+   push_action(N(alice), N(approve), mvo()
+      ("proposer", "alice")
+      ("proposal_name", p_name)
+      ("level", permission_level{ N(alice), config::active_name })
+   );
+
+   transaction_trace_ptr trace;
+   control->applied_transaction.connect([&](const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } });
+   push_action(N(alice), N(exec), mvo()
+      ("proposer", "alice")
+      ("proposal_name", p_name)
+      ("executer", "alice")
+   );
+
+   BOOST_REQUIRE(bool(trace));
+   BOOST_REQUIRE_EQUAL(1, trace->action_traces.size());
+   BOOST_REQUIRE_EQUAL(transaction_receipt::executed, trace->receipt->status);
+} FC_LOG_AND_RETHROW()
+
 BOOST_AUTO_TEST_SUITE_END()

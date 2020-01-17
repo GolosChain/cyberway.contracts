@@ -12,7 +12,8 @@ namespace eosio {
 
          [[eosio::action]]
          void propose(ignore<name> proposer, ignore<name> proposal_name,
-               ignore<std::vector<permission_level>> requested, ignore<transaction> trx);
+               ignore<std::vector<permission_level>> requested, ignore<transaction> trx,
+               ignore<const eosio::binary_extension<std::string>> description);
          [[eosio::action]]
          void approve( name proposer, name proposal_name, permission_level level,
                        const eosio::binary_extension<eosio::checksum256>& proposal_hash );

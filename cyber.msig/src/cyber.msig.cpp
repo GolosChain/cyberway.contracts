@@ -8,7 +8,8 @@ namespace eosio {
 void multisig::propose( ignore<name> proposer,
                         ignore<name> proposal_name,
                         ignore<std::vector<permission_level>> requested,
-                        ignore<transaction> trx )
+                        ignore<transaction> trx,
+                        ignore<const eosio::binary_extension<std::string>> description )
 {
    name _proposer;
    name _proposal_name;

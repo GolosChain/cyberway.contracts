@@ -220,6 +220,10 @@
                 {
                     "name": "trx",
                     "type": "transaction"
+                },
+                {
+                    "name": "description",
+                    "type": "string$"
                 }
             ]
         },

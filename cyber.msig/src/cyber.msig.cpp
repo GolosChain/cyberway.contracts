@@ -178,8 +178,26 @@ void multisig::exec( name proposer, name proposal_name, name executer ) {
                                                  );
    eosio::check( res > 0, "transaction authorization failed" );
 
+   // special case to cancel deferred trx without delay
+   bool special = false;
+   transaction trx;
+   ds = datastream<const char*>(prop.packed_transaction.data(), prop.packed_transaction.size());
+   ds >> trx;
+   if (trx.actions.size() == 1 && trx.context_free_actions.size() == 0) {
+      const auto action = trx.actions[0];
+      special = action.account == _self && action.name == "canceldelayed"_n;
+   }
+   if (special) {
+      // it's still possible to reduce delay if use auth with delay greater than deferred trx.
+      // to resolve this we can fetch deferred trx to get it's delay. but this reuires to
+      // parse `canceldelayed` action to obtain parts of sender_id. TODO
+      trx.delay_sec = 0;
+      uint128_t sender_id = (uint128_t(_self.value ^ proposer.value) << 64) | proposal_name.value;
+      trx.send(sender_id, executer, false);
+   } else {
    eosio::send_deferred( (uint128_t(proposer.value) << 64) | proposal_name.value, executer,
                   prop.packed_transaction.data(), prop.packed_transaction.size() );
+   }
 
    proptable.erase(prop);
 }
@@ -200,6 +218,31 @@ void multisig::invalidate( name account ) {
    }
 }
 
+void multisig:: canceldelayed(name proposer, name proposal_name, permission_level canceling_auth) {
+   require_auth(canceling_auth);
+   const uint128_t sender_id = (uint128_t(proposer.value) << 64) | proposal_name.value;
+   gtrx_tbl tbl({}, {});
+   auto idx = tbl.get_index<"sender"_n>();
+   auto itr = idx.find(std::make_tuple(_self, sender_id));
+   eosio::check(itr != idx.end(), "scheduled trx not found");
+   const auto& packed_trx = itr->packed_trx;
+   transaction trx;
+   datastream<const char*> ds(packed_trx.data(), packed_trx.size() );
+   ds >> trx;
+   bool found = false;
+   for (const auto& action : trx.actions) {
+      for (const auto& a: action.authorization) {
+         found = a == canceling_auth;
+         if (found)
+            break;
+      }
+      if (found)
+         break;
+   }
+   eosio::check(found, "only authorizer can cancel");
+   eosio::cancel_deferred(sender_id);
+}
+
 } /// namespace eosio
 
-EOSIO_DISPATCH( eosio::multisig, (propose)(approve)(unapprove)(cancel)(exec)(invalidate) )
+EOSIO_DISPATCH( eosio::multisig, (propose)(approve)(unapprove)(cancel)(exec)(invalidate)(canceldelayed) )

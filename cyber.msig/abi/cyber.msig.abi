@@ -100,6 +100,15 @@
             ]
         },
         {
+            "name": "canceldelayed",
+            "base": "",
+            "fields": [
+                {"type": "name", "name": "proposer"},
+                {"type": "name", "name": "proposal_name"},
+                {"type": "permission_level", "name": "canceling_auth"},
+            ]
+        },
+        {
             "name": "exec",
             "base": "",
             "fields": [
@@ -311,6 +320,10 @@
         {
             "name": "cancel",
             "type": "cancel"
+        },
+        {
+            "name": "canceldelayed",
+            "type": "canceldelayed"
         },
         {
             "name": "exec",

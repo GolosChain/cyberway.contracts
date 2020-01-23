@@ -26,6 +26,8 @@ namespace eosio {
          [[eosio::action]]
          void invalidate( name account );
 
+         [[eosio::action]] void canceldelayed(name proposer, name proposal, permission_level canceling_auth);
+
       private:
          struct [[eosio::table]] proposal {
             name                            proposal_name;
@@ -36,6 +38,7 @@ namespace eosio {
 
          typedef eosio::multi_index< "proposal"_n, proposal > proposals;
 
+         // never used on CyberWay, remove?
          struct [[eosio::table]] old_approvals_info {
             name                            proposal_name;
             std::vector<permission_level>   requested_approvals;
@@ -71,6 +74,23 @@ namespace eosio {
          };
 
          typedef eosio::multi_index< "invals"_n, invalidation > invalidations;
+
+         struct [[eosio::table]] gtransaction {
+            uint64_t             id;
+            eosio::checksum256   trx_id;
+            name                 sender;
+            uint128_t            sender_id;
+            time_point           delay_until;
+            time_point           expiration;
+            time_point           published;
+            std::vector<char>    packed_trx;
+            uint64_t primary_key() const { return id; }
+            using key_t = std::tuple<name, __uint128_t>;
+            key_t by_sender() const { return std::make_tuple(sender, sender_id); }
+         };
+         using gtrx_sender_idx = eosio::indexed_by<"sender"_n, eosio::const_mem_fun<gtransaction, gtransaction::key_t, &gtransaction::by_sender>>;
+         using gtrx_tbl = eosio::multi_index<"gtransaction"_n, gtransaction, gtrx_sender_idx>;
+
    };
 
 } /// namespace eosio

@@ -2,9 +2,9 @@
 #include <common/config.hpp>
 
 namespace cyber { namespace config {
-    
+
 static const auto issuer_name = internal_name;
-    
+
 static const auto reward_interval = 3499;
 static const auto schedule_period_factor = 4;
 static const auto update_emission_per_block_interval = 997;

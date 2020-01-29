@@ -1,0 +1,148 @@
+{
+    "version": "cyberway::abi/1.1",
+    "structs": [
+        {
+            "name": "mainchain_struct",
+            "base": "",
+            "fields": [
+                { "type": "uint64",         "name": "id" },
+                { "type": "uint64",         "name": "heaviest_block" },
+                { "type": "checksum256",    "name": "chain_work_data" }
+            ]
+        },{
+            "name": "block_header",
+            "base": "",
+            "fields": [
+                { "type": "uint32",       "name": "version" },
+                { "type": "checksum256",  "name": "prev_hash" },
+                { "type": "checksum256",  "name": "merkle_root" },
+                { "type": "uint32",       "name": "time" },
+                { "type": "uint32",       "name": "bits" },
+                { "type": "uint32",       "name": "nonce" }
+            ]
+        },{
+            "name": "block_header_arg",
+            "base": "",
+            "fields": [
+                { "type": "uint32",       "name": "version" },
+                { "type": "string",       "name": "prev_hash" },
+                { "type": "string",       "name": "merkle_root" },
+                { "type": "uint32",       "name": "time" },
+                { "type": "uint32",       "name": "bits" },
+                { "type": "uint32",       "name": "nonce" }
+            ]
+        },{
+            "name": "block",
+            "base": "",
+            "fields": [
+                { "type": "uint64",       "name": "id" },
+                { "type": "checksum256",  "name": "key" },
+                { "type": "block_header", "name": "header" },
+                { "type": "uint64",       "name": "height" },
+                { "type": "checksum256",  "name": "chain_work_data" },
+                { "type": "uint64[]",     "name": "ancestors" }
+            ]
+        },{
+            "name": "init_args",
+            "base": "",
+            "fields": [
+                { "type": "block_header_arg", "name": "header" },
+                { "type": "uint64",           "name": "height" }
+            ]
+        },{
+            "name": "addheader_args",
+            "base": "",
+            "fields": [
+                { "type": "block_header_arg", "name": "header" },
+                { "type": "name",             "name": "payer" }
+            ]
+        },{
+            "name": "addheaderhex_args",
+            "base": "",
+            "fields": [
+                { "type": "string",       "name": "header_hex" },
+                { "type": "name",         "name": "payer" }
+            ]
+        },{
+            "name": "verifytx_args",
+            "base": "",
+            "fields": [
+                { "type": "string",       "name": "tx_hex" },
+                { "type": "uint32",       "name": "tx_index" },
+                { "type": "string[]",     "name": "siblings_hex" },
+                { "type": "string",       "name": "header_hash_hex" },
+                { "type": "uint64",       "name": "min_confirmations_num" }
+            ]
+        },{
+            "name": "checkpayment_args",
+            "base": "",
+            "fields": [
+                { "type": "string",       "name": "tx_hex" },
+                { "type": "string",       "name": "address_hex" },
+                { "type": "asset",        "name": "min_quantity" }
+            ]
+        },{
+            "name": "checkaddress_args",
+            "base": "",
+            "fields": [
+                { "type": "string",       "name": "address_hex" }
+            ]
+        }
+    ],
+    "types": [],
+    "actions": [
+        {
+            "name": "init",
+            "type": "init_args"
+        },{
+            "name": "addheader",
+            "type": "addheader_args"
+        },{
+            "name": "addheaderhex",
+            "type": "addheaderhex_args"
+        },{
+            "name": "verifytx",
+            "type": "verifytx_args"
+        },{
+            "name": "checkpayment",
+            "type": "checkpayment_args"
+        },{
+            "name": "checkaddress",
+            "type": "checkaddress_args"
+        }
+    ],
+    "events": [],
+    "tables": [
+        {
+            "name": "mainchain",
+            "type": "mainchain_struct",
+            "indexes": [{
+                "name": "primary",
+                "unique": "true",
+                "orders": [
+                    {"field": "id", "order": "asc"}
+                ]
+            }]
+        },{
+            "name": "btcrel.block",
+            "type": "block",
+            "indexes": [
+                {
+                    "name": "primary",
+                    "unique": "true",
+                    "orders": [
+                        {"field": "id", "order": "asc"}
+                    ]
+                },{
+                    "name": "bykey",
+                    "unique": "true",
+                    "orders": [
+                        {"field": "key", "order": "asc"}
+                    ]
+                }
+            ]
+        }
+    ],
+    "variants": [],
+    "abi_extensions": []
+}

@@ -45,6 +45,7 @@ add_subdirectory(cyber.stake)
 add_subdirectory(cyber.govern)
 add_subdirectory(cyber.rejector)
 add_subdirectory(cyber.incomereject)
+add_subdirectory(cyber.btcrelay)
 
 add_subdirectory(scripts/base-genesis)
 

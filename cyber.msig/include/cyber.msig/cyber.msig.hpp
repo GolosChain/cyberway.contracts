@@ -37,17 +37,6 @@ namespace eosio {
          using proposals [[eosio::order("proposal_name")]] =
             eosio::multi_index<"proposal"_n, proposal>;
 
-         struct old_approvals_info {
-            name                            proposal_name;
-            std::vector<permission_level>   requested_approvals;
-            std::vector<permission_level>   provided_approvals;
-
-            uint64_t primary_key()const { return proposal_name.value; }
-         };
-
-         using old_approvals [[eosio::order("proposal_name")]] =
-            eosio::multi_index<"approvals"_n, old_approvals_info>;
-
          struct approval {
             permission_level level;
             time_point       time;

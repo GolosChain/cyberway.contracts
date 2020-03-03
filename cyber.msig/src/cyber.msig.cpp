@@ -76,16 +76,7 @@ void multisig::approve( name proposer, name proposal_name, permission_level leve
             a.requested_approvals.erase( itr );
          });
    } else {
-      old_approvals old_apptable(  _self, proposer.value );
-      auto& apps = old_apptable.get( proposal_name.value, "proposal not found" );
-
-      auto itr = std::find( apps.requested_approvals.begin(), apps.requested_approvals.end(), level );
-      eosio::check( itr != apps.requested_approvals.end(), "approval is not on the list of requested approvals" );
-
-      old_apptable.modify( apps, proposer, [&]( auto& a ) {
-            a.provided_approvals.push_back( level );
-            a.requested_approvals.erase( itr );
-         });
+      eosio::check(false, "proposal not found");
    }
 }
 
@@ -102,14 +93,7 @@ void multisig::unapprove( name proposer, name proposal_name, permission_level le
             a.provided_approvals.erase( itr );
          });
    } else {
-      old_approvals old_apptable(  _self, proposer.value );
-      auto& apps = old_apptable.get( proposal_name.value, "proposal not found" );
-      auto itr = std::find( apps.provided_approvals.begin(), apps.provided_approvals.end(), level );
-      eosio::check( itr != apps.provided_approvals.end(), "no approval previously granted" );
-      old_apptable.modify( apps, proposer, [&]( auto& a ) {
-            a.requested_approvals.push_back( level );
-            a.provided_approvals.erase( itr );
-         });
+      eosio::check(false, "proposal not found");
    }
 }
 
@@ -127,14 +111,8 @@ void multisig::cancel( name proposer, name proposal_name, name canceler ) {
    //remove from new table
    approvals apptable(  _self, proposer.value );
    auto apps_it = apptable.find( proposal_name.value );
-   if ( apps_it != apptable.end() ) {
-      apptable.erase(apps_it);
-   } else {
-      old_approvals old_apptable(  _self, proposer.value );
-      auto apps_it = old_apptable.find( proposal_name.value );
-      eosio::check( apps_it != old_apptable.end(), "proposal not found" );
-      old_apptable.erase(apps_it);
-   }
+   eosio::check(apps_it != apptable.end(), "proposal not found");
+   apptable.erase(apps_it);
 }
 
 void multisig::exec( name proposer, name proposal_name, name executer ) {
@@ -161,15 +139,7 @@ void multisig::exec( name proposer, name proposal_name, name executer ) {
       }
       apptable.erase(apps_it);
    } else {
-      old_approvals old_apptable(  _self, proposer.value );
-      auto& apps = old_apptable.get( proposal_name.value, "proposal not found" );
-      for ( auto& level : apps.provided_approvals ) {
-         auto it = inv_table.find( level.actor.value );
-         if ( it == inv_table.end() ) {
-            approvals.push_back( level );
-         }
-      }
-      old_apptable.erase(apps);
+      eosio::check(false, "proposal not found");
    }
    auto packed_provided_approvals = pack(approvals);
    auto res = eosio::check_transaction_authorization( prop.packed_transaction.data(), prop.packed_transaction.size(),

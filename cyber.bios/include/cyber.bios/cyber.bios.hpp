@@ -18,6 +18,7 @@ namespace cyber {
    using eosio::time_point_sec;
    using eosio::contract;
    using eosio::asset;
+   using eosio::symbol_code;
 
    struct permission_level_weight {
       permission_level  permission;
@@ -110,7 +111,6 @@ namespace cyber {
         eosio::multi_index<"stake.autorc"_n, auto_recall, autorc_key_index>;
       void autorcs_dummy() { autorcs autorcs_tabl(_self, _self.value); } // an ugly way to make abi appear
     
-         void check_stake(name account);
       public:
          using contract::contract;
          [[eosio::action]]
@@ -183,10 +183,9 @@ namespace cyber {
 
          [[eosio::action]]
          void providebw(name provider, name account) {} // defined in cyberway/libraries/chain/cyberway/cyberway_contract.cpp
-
-         [[eosio::on_notify(CYBER_STAKE "::withdraw")]] void on_stake_withdraw(name account, asset quantity);
-         [[eosio::on_notify(CYBER_STAKE "::provide")]] void on_stake_provide(name provider_name, name consumer_name, asset quantity);
-
+         
+         [[eosio::action]]
+         void checkstake(name account, symbol_code token_code);
    };
 
 } /// namespace cyber

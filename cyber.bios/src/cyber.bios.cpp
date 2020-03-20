@@ -170,23 +170,12 @@ void bios::newaccount(name creator, name newact, ignore<authority> owner, ignore
     }
 }
 
-void bios::check_stake(name account) {
-    auto token_code = system_token.code();
+void bios::checkstake(name account, symbol_code token_code) {
+    eosio::check(token_code == system_token.code(), "unsupported token_code"); 
     auto cost = eosio::get_used_resources_cost(account);
     auto effective_stake = stake::get_effective_stake(account, token_code);
     eosio::check(!stake::enabled(token_code) || (effective_stake >= cost),
         "no staked tokens available due to resource usage");
-}
-
-void bios::on_stake_withdraw(name account, asset quantity) {
-    (void)quantity;
-    check_stake(account);
-}
-
-void bios::on_stake_provide(name provider_name, name consumer_name, asset quantity) {
-    (void)quantity;
-    (void)consumer_name; 
-    check_stake(provider_name);
 }
 
 }

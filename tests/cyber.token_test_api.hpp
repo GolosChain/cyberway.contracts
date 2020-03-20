@@ -34,7 +34,7 @@ struct cyber_token_api: base_contract_api {
     }
 
     action_result open(account_name owner, symbol symbol, account_name payer) {
-        return push(N(open), owner, args()
+        return push(N(open), payer, args()
             ("owner", owner)
             ("symbol", symbol)
             ("ram_payer", payer)

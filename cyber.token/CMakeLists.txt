@@ -3,7 +3,8 @@ install_contract(cyber.token)
 
 target_include_directories(cyber.token.wasm
    PUBLIC 
-   ${CMAKE_CURRENT_SOURCE_DIR}/include)
+   ${CMAKE_CURRENT_SOURCE_DIR}/include
+   ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 set_target_properties(cyber.token.wasm
    PROPERTIES

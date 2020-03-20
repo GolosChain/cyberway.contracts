@@ -18,6 +18,7 @@ inline eosio::chain::name operator ""_n() {
 
 #define CYBER_TOKEN "cyber.token"
 #define CYBER_STAKE "cyber.stake"
+#define CYBER_BOX "cyber.box"
 
 namespace cyber { namespace config {
 
@@ -25,10 +26,12 @@ namespace cyber { namespace config {
 static const auto token_name = "cyber.token"_n;
 static const auto stake_name = "cyber.stake"_n;
 static const auto govern_name = "cyber.govern"_n;
+static const auto box_name = "cyber.box"_n;
 static const auto worker_name = "cyber.worker"_n;
 static const auto names_name = "cyber.names"_n;
 static const auto producers_name = "cyber.prods"_n;
 static const auto internal_name = "cyber"_n;
+static const auto null_name = "cyber.null"_n;
 
 // permissions
 static const auto code_name = "cyber.code"_n;
@@ -52,6 +55,9 @@ static constexpr int64_t blocks_per_year = int64_t(365)*24*60*60*1000/block_inte
 #endif
 
 static const std::string retire_memo = "retire";
+
+static constexpr size_t max_memo_size = 384;
+static constexpr char memo_error[] = "memo has more than 384 bytes";
 
 } // config
 

@@ -168,7 +168,7 @@ void stake::delegatevote(name grantor_name, name recipient_name, asset quantity)
 
 void stake::recallvote(name grantor_name, name recipient_name, symbol_code token_code, int16_t pct) {
     require_auth(grantor_name);
-    eosio::recall_stake_proxied(token_code, grantor_name, recipient_name, pct);
+    eosio::recall_stake_proxied(token_code, grantor_name, recipient_name, pct, false);
 }
 
 void stake::check_grant_terms(const structures::agent& agent, int16_t break_fee, int64_t break_min_own_staked) {
@@ -264,15 +264,16 @@ void stake::on_transfer(name from, name to, asset quantity, std::string memo) {
     modify_stat(token_code, [&](auto& s) { s.total_staked += quantity.amount; });
 }
 
-void stake::withdraw(name account, asset quantity) {
-    require_auth(account);
-    eosio::check(quantity.amount > 0, "must withdraw positive quantity");
-    auto token_code = quantity.symbol.code();
-    params params_table(table_owner, table_owner.value);
-    const auto& param = params_table.get(token_code.raw(), "no staking for token");
-    eosio::check(param.token_symbol == quantity.symbol, "quantity precision mismatch");
+void stake::send_checkstake(name account, symbol_code token_code) {
+    eosio::action(
+        eosio::permission_level{_self, config::active_name},
+        eosio::token::get_issuer(config::token_name, token_code), "checkstake"_n,
+        std::make_tuple(account, token_code)
+    ).send();
+}
 
-    update_stake_proxied(token_code, account);
+void stake::sub_own_funds(name account, asset quantity) {
+    auto token_code = quantity.symbol.code();
     agents agents_table(table_owner, table_owner.value);
     auto agents_idx = agents_table.get_index<"bykey"_n>();
     auto agent = get_agent_itr(token_code, agents_idx, account);
@@ -294,14 +295,24 @@ void stake::withdraw(name account, asset quantity) {
         a.shares_sum -= shares_diff;
         a.own_share -= shares_diff;
     });
-
+    
     if (!agent->proxy_level) {
         set_votes(token_code, std::map<name, int64_t>{{account, -quantity.amount}});
     }
+}
+
+void stake::withdraw(name account, asset quantity) {
+    require_auth(account);
+    eosio::check(quantity.amount > 0, "must withdraw positive quantity");
+    auto token_code = quantity.symbol.code();
+    params params_table(table_owner, table_owner.value);
+    const auto& param = params_table.get(token_code.raw(), "no staking for token");
+    eosio::check(param.token_symbol == quantity.symbol, "quantity precision mismatch");
+
+    update_stake_proxied(token_code, account);
+    sub_own_funds(account, quantity);
     modify_stat(token_code, [&](auto& s) { s.total_staked += -quantity.amount; });
-
-    require_recipient(eosio::token::get_issuer(config::token_name, quantity.symbol.code()));
-
+    send_checkstake(account, token_code);
     INLINE_ACTION_SENDER(eosio::token, transfer)(config::token_name, {_self, config::active_name},
         {_self, account, quantity, "unstaked tokens"});
 }
@@ -656,7 +667,7 @@ void stake::update_provided(name grantor_name, name recipient_name, asset quanti
         }
 
         int64_t available = grantor->get_own_funds() - grantor->provided;
-        eosio::check(available > 0, "SYSTEM: incorrect available");
+        eosio::check(available >= 0, "SYSTEM: incorrect available");
         eosio::check(to_provide <= available, "not enough staked tokens");
 
         if (prov_itr != provs_index.end()) {
@@ -673,7 +684,7 @@ void stake::update_provided(name grantor_name, name recipient_name, asset quanti
         }
         agents_idx.modify(grantor, name(), [&](auto& a) { a.provided += to_provide; });
         agents_idx.modify(recipient, name(), [&](auto& a) { a.received += quantity.amount; });
-        require_recipient(eosio::token::get_issuer(config::token_name, quantity.symbol.code()));
+        send_checkstake(grantor_name, token_code);
     }
     else {
         auto to_deprive = -quantity.amount;
@@ -834,6 +845,123 @@ void stake::returnlosses() {
     s.token_code = token_code;
     s.total = total;
     losses_state.set(s, _self);
+}
+
+void stake::constrain(name treasurer, name title, asset quantity) {
+    require_auth(treasurer);
+    
+    auto token_code = quantity.symbol.code();
+    params params_table(table_owner, table_owner.value);
+    const auto& param = params_table.get(token_code.raw(), "no staking for token");
+    eosio::check(param.token_symbol == quantity.symbol, "quantity precision mismatch");
+    update_stake_proxied(token_code, treasurer);
+
+    agents agents_table(table_owner, table_owner.value);
+    auto agents_idx = agents_table.get_index<"bykey"_n>();
+    auto treasurer_itr = get_agent_itr(token_code, agents_idx, treasurer);
+
+    int64_t available = treasurer_itr->get_own_funds() - treasurer_itr->provided;
+    eosio::check(available >= 0, "SYSTEM: incorrect available");
+    eosio::check(quantity.amount <= available, "not enough staked tokens");
+
+    agents_idx.modify(treasurer_itr, name(), [&](auto& a) { a.provided += quantity.amount; });
+    send_checkstake(treasurer, token_code);
+    
+    boxes boxes_table(_self, treasurer.value);
+    eosio::check(boxes_table.find(title.value) == boxes_table.end(), "non-unique title");
+
+    boxes_table.emplace(treasurer, [&](auto& b) { b = {
+        .title = title,
+        .quantity = quantity
+    };});
+    
+    eosio::action(
+        eosio::permission_level{_self, config::active_name},
+        config::box_name, "packup"_n,
+        std::make_tuple(_self, treasurer, title)
+    ).send();
+}
+
+void stake::erase_box(name contract, name treasurer, name title, name owner) {
+    eosio::check(contract == _self, "SYSTEM: incorrect contract");
+    
+    boxes boxes_table(_self, treasurer.value);
+    auto box_itr = boxes_table.find(title.value);
+    eosio::check(box_itr != boxes_table.end(), "SYSTEM: nothing to unpack");
+    
+    auto quantity = box_itr->quantity;
+    auto token_code = quantity.symbol.code();
+    auto amount = box_itr->quantity.amount;
+    update_stake_proxied(token_code, treasurer);
+    
+    {
+        agents agents_table(table_owner, table_owner.value);
+        auto agents_idx = agents_table.get_index<"bykey"_n>();
+        auto treasurer_itr = get_agent_itr(token_code, agents_idx, treasurer);
+        
+        eosio::check(amount <= treasurer_itr->provided, "SYSTEM: box_itr->quantity.amount > treasurer_itr->provided");
+        agents_idx.modify(treasurer_itr, name(), [&](auto& a) { a.provided -= amount; });
+    }
+    
+    boxes_table.erase(box_itr);
+    
+    if (treasurer == owner) {
+        return;
+    }
+    
+    auto prev_recipient = name();
+    int32_t add_pct = 1;
+    int64_t balance = 0;
+    while (true) {
+        agents agents_table(table_owner, table_owner.value);
+        auto agents_idx = agents_table.get_index<"bykey"_n>();
+        auto treasurer_itr = get_agent_itr(token_code, agents_idx, treasurer);
+        balance = treasurer_itr->balance;
+        if (balance >= amount) {
+            break;
+        }
+        
+        grants grants_table(table_owner, table_owner.value);
+        auto grants_idx = grants_table.get_index<"bykey"_n>();
+        auto grant_itr = grants_idx.lower_bound(std::make_tuple(token_code, treasurer, name()));
+        if (grant_itr == grants_idx.end() || (grant_itr->token_code != token_code) || (grant_itr->grantor_name != treasurer))  {
+            break;
+        }
+        
+        auto recipient_itr = get_agent_itr(token_code, agents_idx, grant_itr->recipient_name);
+        int64_t granted  = safe_prop(recipient_itr->get_total_funds(), grant_itr->share, recipient_itr->shares_sum);
+        int64_t shortage = amount - balance;
+        
+        auto cur_pct = config::_100percent;
+        
+        if (granted > shortage) {
+            if (grant_itr->recipient_name == prev_recipient) {
+                add_pct = std::min<int32_t>(add_pct * 10, config::_100percent);
+            }
+            cur_pct = std::min<int64_t>((shortage * config::_100percent / granted) + add_pct, config::_100percent);
+        }
+        prev_recipient = grant_itr->recipient_name;
+        agents_table.flush_cache();
+        grants_table.flush_cache();
+        eosio::recall_stake_proxied(token_code, treasurer, prev_recipient, cur_pct, true);
+    }
+    quantity.amount = std::min(amount, balance); //it seems that balance cannot be less than amount but just in case
+    
+    sub_own_funds(treasurer, quantity);
+    modify_stat(token_code, [&](auto& s) { s.total_staked -= quantity.amount; });
+    
+    eosio::check(eosio::token::balance_exist(::cyber::config::token_name, owner, token_code), "owner balance does not exist");
+    
+    INLINE_ACTION_SENDER(eosio::token, transfer)(config::token_name, {_self, config::active_name},
+        {_self, owner, quantity, "unpacked tokens"});
+}
+
+void stake::on_unpack(name contract, name treasurer, name title, name owner) {
+    erase_box(contract, treasurer, title, owner);
+}
+
+void stake::on_burn(name contract, name treasurer, name title) {
+    erase_box(contract, treasurer, title, config::null_name);
 }
 
 } /// namespace cyber

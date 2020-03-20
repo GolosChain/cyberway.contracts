@@ -220,6 +220,11 @@ public:
         return push(N(setautorcmode), issuer, args()("enabled", enabled)("token_code", token_code));
     }
 
+    action_result constrain(name treasurer, name title, asset quantity, name signer = name()) {
+        return push(N(constrain), signer ? signer : treasurer, 
+            args()("treasurer", treasurer)("title", title)("quantity", quantity));
+    }
+
     action_result register_candidate(account_name account, symbol_code token_code, bool need_to_open = true) {
         if (need_to_open) {
             auto ret = open(account, token_code);

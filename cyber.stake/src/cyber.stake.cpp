@@ -328,7 +328,7 @@ void stake::set_suspense(name ram_payer, susps& susps_table, susps_idx_t& susps_
     auto susps_itr = susps_idx.find(std::make_tuple(token_code, account, action_name));
     if (susps_itr != susps_idx.end()) {
         susps_idx.modify(susps_itr, name(), [&](auto& s) {
-            s.expiration_time = std::max(s.expiration_time, time_point_sec(eosio::current_time_point() + seconds(delay))); 
+            s.expiration_time = std::max(s.expiration_time, time_point_sec(eosio::current_time_point() + seconds(delay)));
         });
     }
     else {
@@ -353,19 +353,19 @@ void stake::setkey(name account, symbol_code token_code, std::optional<public_ke
     auto agents_idx = agents_table.get_index<"bykey"_n>();
     auto agent = get_agent_itr(token_code, agents_idx, account);
     eosio::check(!agent->proxy_level, account.to_string() + " is not a candidate");
-    
+
     auto issuer = eosio::token::get_issuer(config::token_name, token_code);
     bool has_issuer_auth = has_auth(issuer);
-    
+
     candidates candidates_table(table_owner, table_owner.value);
     auto cands_idx = candidates_table.get_index<"bykey"_n>();
     auto cand = cands_idx.find(std::make_tuple(token_code, account));
     eosio::check(cand != cands_idx.end(), ("SYSTEM: candidate " + account.to_string() + " doesn't exist").c_str());
-    
+
     susps susps_table(_self, _self.value);
     auto susps_idx = susps_table.get_index<"bykey"_n>();
     auto action_name = "setkey"_n;
-    
+
     if (actual_signing_key != public_key{}) {
         require_auth(account);
         check_suspense(susps_table, susps_idx, token_code, account, action_name);
@@ -374,12 +374,12 @@ void stake::setkey(name account, symbol_code token_code, std::optional<public_ke
     else if (!has_issuer_auth && agent->min_own_staked >= min_own_staked_for_election && agent->get_own_funds() >= agent->min_own_staked) {
         require_auth(account);
     }
-    
+
     cands_idx.modify(cand, name(), [actual_signing_key](auto& a) {
         a.signing_key = actual_signing_key;
         a.enabled = actual_signing_key != public_key{};
     });
-    
+
     if (has_issuer_auth && !cand->enabled) {
         set_suspense(issuer, susps_table, susps_idx, token_code, account, action_name, config::key_recovery_delay);
     }
@@ -388,16 +388,16 @@ void stake::setkey(name account, symbol_code token_code, std::optional<public_ke
 void stake::setproxylvl(name account, symbol_code token_code, uint8_t level) {
     auto issuer = eosio::token::get_issuer(config::token_name, token_code);
     bool has_issuer_auth = has_auth(issuer);
-    
+
     susps susps_table(_self, _self.value);
     auto susps_idx = susps_table.get_index<"bykey"_n>();
     auto action_name = "setproxylvl"_n;
-    
+
     if (!has_issuer_auth) {
         require_auth(account);
         check_suspense(susps_table, susps_idx, token_code, account, action_name);
     }
-    
+
     params params_table(table_owner, table_owner.value);
     const auto& param = params_table.get(token_code.raw(), "no staking for token");
 
@@ -445,12 +445,12 @@ void stake::setproxylvl(name account, symbol_code token_code, uint8_t level) {
         a.proxy_level = level;
     });
     agent->check_own_staked(_self, param.min_own_staked_for_election);
-    
+
     if (has_issuer_auth) {
         set_suspense(issuer, susps_table, susps_idx, token_code, account, action_name, config::proxylvl_recovery_delay);
     }
 }
- 
+
 void stake::create(symbol token_symbol, std::vector<uint8_t> max_proxies, int64_t depriving_window, int64_t min_own_staked_for_election)
 {
     auto token_code = token_symbol.code();
@@ -536,13 +536,13 @@ void stake::updatefunds(name account, symbol_code token_code) {
 void stake::suspendcand(name account, symbol_code token_code) {
     //require_auth(anyone);
     auto issuer = eosio::token::get_issuer(config::token_name, token_code);
-    
+
     candidates candidates_table(table_owner, table_owner.value);
     auto cands_idx = candidates_table.get_index<"bykey"_n>();
     auto cand = cands_idx.find(std::make_tuple(token_code, account));
     eosio::check(cand != cands_idx.end(), "candidate doesn't exist");
     eosio::check(cand->latest_pick < eosio::current_time_point() - eosio::seconds(config::max_no_pick_period), "candidate is active");
-    
+
     INLINE_ACTION_SENDER(cyber::stake, setproxylvl)(config::stake_name, {issuer, config::active_name},
         {account, token_code, get_max_level(token_code)});
 }
@@ -742,15 +742,15 @@ void stake::claim(name grantor_name, name recipient_name, symbol_code token_code
 void stake::setautorc(name account, symbol_code token_code, bool break_fee_enabled, bool break_min_stake_enabled) {
     require_auth(account);
     staking_exists(token_code);
-    
+
     agents agents_table(table_owner, table_owner.value);
     auto agents_idx = agents_table.get_index<"bykey"_n>();
     get_agent_itr(token_code, agents_idx, account); //checking that the agent exists
-    
+
     autorcs autorcs_table(table_owner, table_owner.value);
     auto autorcs_idx = autorcs_table.get_index<"bykey"_n>();
     autorcs_idx.get(std::make_tuple(token_code, name()), "custom auto recall mode is disabled for this token");
-    
+
     if (!break_fee_enabled && !break_min_stake_enabled) {
         auto autorc_itr = autorcs_idx.find(std::make_tuple(token_code, account));
         eosio::check(autorc_itr != autorcs_idx.end(), "no params changed");
@@ -781,10 +781,10 @@ void stake::setautorcmode(symbol_code token_code, bool enabled) {
     auto issuer = eosio::token::get_issuer(config::token_name, token_code);
     require_auth(issuer);
     staking_exists(token_code);
-    
+
     autorcs autorcs_table(table_owner, table_owner.value);
     auto autorcs_idx = autorcs_table.get_index<"bykey"_n>();
-    auto autorc_itr = autorcs_idx.find(std::make_tuple(token_code, name())); 
+    auto autorc_itr = autorcs_idx.find(std::make_tuple(token_code, name()));
     if (enabled) {
         eosio::check(autorc_itr == autorcs_idx.end(), "custom auto recall mode is already enabled for this token");
         autorcs_table.emplace(issuer, [&](auto& p) { p = {
@@ -797,6 +797,16 @@ void stake::setautorcmode(symbol_code token_code, bool enabled) {
         eosio::check(autorc_itr != autorcs_idx.end(), "custom auto recall mode is already disabled for this token");
         autorcs_idx.erase(autorc_itr);
     }
+}
+
+void stake::setinfo(name account, symbol_code token_code, string url, eosio::binary_extension<string> info) {
+    require_auth(account);
+    eosio::check(url.size() <= config::max_validator_meta_size, "url is too long");
+    eosio::check(!info.has_value() || info->size() <= config::max_validator_meta_size, "info is too long");
+    agents tbl(table_owner, table_owner.value);
+    auto idx = tbl.get_index<"bykey"_n>();
+    auto agent = get_agent_itr(token_code, idx, account); // only syste
+    eosio::check(!agent->proxy_level, "only validator can set info");
 }
 
 void stake::returnlosses() {

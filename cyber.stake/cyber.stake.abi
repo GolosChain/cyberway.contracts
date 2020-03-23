@@ -131,6 +131,14 @@
                 {"name": "break_min_own_staked", "type": "int64"}
             ]
         }, {
+            "name": "setinfo", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "url", "type": "string"}, 
+                {"name": "info", "type": "string$"}
+            ]
+        }, {
             "name": "setkey", "base": "", 
             "fields": [
                 {"name": "account", "type": "name"}, 
@@ -202,6 +210,7 @@
         {"name": "setautorc", "type": "setautorc"}, 
         {"name": "setautorcmode", "type": "setautorcmode"}, 
         {"name": "setgrntterms", "type": "setgrntterms"}, 
+        {"name": "setinfo", "type": "setinfo"}, 
         {"name": "setkey", "type": "setkey"}, 
         {"name": "setminstaked", "type": "setminstaked"}, 
         {"name": "setproxyfee", "type": "setproxyfee"}, 

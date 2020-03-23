@@ -93,16 +93,16 @@ struct structures {
         }
         void check_own_staked(name privileged, int64_t min_own_staked_for_election) const {
             if (!has_auth(privileged)) {
-                //there are accounts with inconsistent balance and min_own_staked values, 
+                //there are accounts with inconsistent balance and min_own_staked values,
                 //to test their deactivation we allow _self to set such values
-                
+
                 eosio::check(proxy_level || min_own_staked >= min_own_staked_for_election,
                     "min_own_staked can't be less than min_own_staked_for_election for users with an ultimate level");
                 eosio::check(get_own_funds() >= min_own_staked, "own staked funds can't be less than min_own_staked");
             }
         }
-     };
-     
+    };
+
     struct auto_recall {
         uint64_t id;
         symbol_code token_code;
@@ -228,7 +228,7 @@ struct structures {
     using prov_payouts [[eosio::order("id")]] =
         eosio::multi_index<"provpayout"_n, structures::prov_payout_struct, prov_payout_acc_index>;
 
-    using susp_key_index [[using eosio: order("token_code"), order("account"), order("action_name")]] = 
+    using susp_key_index [[using eosio: order("token_code"), order("account"), order("action_name")]] =
         eosio::indexed_by<"bykey"_n, eosio::const_mem_fun<structures::suspense, structures::suspense::key_t, &structures::suspense::by_key> >;
     using susps [[eosio::order("id")]] =
         eosio::multi_index<"suspense"_n, structures::suspense, susp_key_index>;
@@ -278,7 +278,7 @@ struct structures {
     void set_votes(symbol_code token_code, const std::map<name, int64_t>& votes_changes);
 
     void update_provided(name grantor_name, name recipient_name, asset quantity);
-    
+
     void check_suspense(susps& susps_table, susps_idx_t& susps_idx, symbol_code token_code, name account, name action_name);
     void set_suspense(name ram_payer, susps& susps_table, susps_idx_t& susps_idx, symbol_code token_code, name account, name action_name, int delay);
 
@@ -289,7 +289,7 @@ public:
         int64_t votes = 0;
         public_key signing_key = {};
     };
-    
+
     static inline uint8_t get_max_level(symbol_code token_code) {
         params params_table(table_owner, table_owner.value);
         return params_table.get(token_code.raw(), "no staking for token").max_proxies.size();
@@ -369,10 +369,10 @@ public:
         }
         return ret;
     }
-    
+
     static inline bool candidate_exists(name account, symbol_code token_code) {
         staking_exists(token_code);
-        
+
         candidates candidates_table(table_owner, table_owner.value);
         auto cands_idx = candidates_table.get_index<"bykey"_n>();
         return cands_idx.find(std::make_tuple(token_code, account)) != cands_idx.end();
@@ -407,7 +407,7 @@ public:
     [[eosio::action]] void setproxyfee(name account, symbol_code token_code, int16_t fee);
     [[eosio::action]] void setminstaked(name account, symbol_code token_code, int64_t min_own_staked);
     [[eosio::action]] void setkey(name account, symbol_code token_code, std::optional<public_key> signing_key);
-    
+
     [[eosio::action]] void updatefunds(name account, symbol_code token_code);
     [[eosio::action]] void suspendcand(name account, symbol_code token_code);
 
@@ -428,8 +428,10 @@ public:
     [[eosio::action]] void recalluse(name grantor_name, name recipient_name, asset quantity);
 
     [[eosio::action]] void claim(name grantor_name, name recipient_name, symbol_code token_code);
-    
+
     [[eosio::action]] void setautorc(name account, symbol_code token_code, bool break_fee_enabled, bool break_min_stake_enabled);
     [[eosio::action]] void setautorcmode(symbol_code token_code, bool enabled);
+
+    [[eosio::action]] void setinfo(name account, symbol_code token_code, string url, eosio::binary_extension<string> info);
 };
 } /// namespace cyber

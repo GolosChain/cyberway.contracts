@@ -27,11 +27,11 @@ struct cyber_stake_api: base_contract_api {
         }
         return 0;
     }
-    
+
     action_result push_maybe_msig(account_name act, account_name actor, mvo a, bool self_signed) {
         return self_signed ?
-            push_msig(act, {{actor, config::active_name}, {_code, config::active_name}}, 
-                {actor, _code}, a) : 
+            push_msig(act, {{actor, config::active_name}, {_code, config::active_name}},
+                {actor, _code}, a) :
             push(act, actor, a);
     }
 
@@ -123,7 +123,7 @@ public:
             ("quantity", quantity)
         );
     }
-    
+
     action_result setproxylvl(account_name account, symbol_code token_code, uint8_t level, bool mssg = true, bool self_signed = false) {
         if (mssg && verbose) {
             BOOST_TEST_MESSAGE("--- " << account <<  " sets proxy level");
@@ -135,7 +135,7 @@ public:
         return push_maybe_msig(N(setproxylvl), account, a, self_signed);
     }
     action_result setproxyfee(account_name account, symbol_code token_code, int16_t fee, bool self_signed = false) {
-         auto a = args()
+        auto a = args()
             ("account", account)
             ("token_code", token_code)
             ("fee", fee);
@@ -148,8 +148,8 @@ public:
             ("min_own_staked", min_own_staked);
         return push_maybe_msig(N(setminstaked), account, a, self_signed);
     }
-    
-    action_result setkey(account_name account, symbol_code token_code, bool empty, 
+
+    action_result setkey(account_name account, symbol_code token_code, bool empty,
                          std::optional<account_name> signer = std::nullopt, bool self_signed = false) {
         auto a = args()
             ("account", account)
@@ -166,7 +166,7 @@ public:
             ("token_code", token_code)
         );
     }
-    
+
     action_result suspendcand(account_name account, symbol_code token_code) {
         return push(N(suspendcand), account, args()
             ("account", account)
@@ -210,14 +210,24 @@ public:
             ("token_code", token_code)
         );
     }
-    
+
     action_result setautorc(account_name account, symbol_code token_code, bool break_fee_enabled, bool break_min_stake_enabled) {
         return push(N(setautorc), account, args()("account", account)("token_code", token_code)
             ("break_fee_enabled", break_fee_enabled)("break_min_stake_enabled", break_min_stake_enabled));
     }
-    
+
     action_result setautorcmode(account_name issuer, symbol_code token_code, bool enabled) {
         return push(N(setautorcmode), issuer, args()("enabled", enabled)("token_code", token_code));
+    }
+
+    action_result setinfo(account_name account, symbol_code token_code, string url, optional<string> info = {}) {
+        auto a = args()
+            ("account", account)
+            ("token_code", token_code)
+            ("url", url);
+        if (info)
+            a("info", info);
+        return push(N(setinfo), account, a);
     }
 
     action_result register_candidate(account_name account, symbol_code token_code, bool need_to_open = true) {
@@ -232,7 +242,7 @@ public:
         if (verbose) {
             BOOST_TEST_MESSAGE("--- " << account <<  " sets key");
         }
-         return push(N(setkey), account, args()
+        return push(N(setkey), account, args()
             ("account", account)
             ("token_code", token_code)
             ("signing_key", base_tester::get_public_key(account, "active"))
@@ -260,15 +270,15 @@ public:
         auto all = _tester->get_all_chaindb_rows(name(), 0, N(stake.cand), false);
         for(auto& v : all) {
             auto o = mvo(v);
-            if (v["account"].as<account_name>() == account && 
-                v["token_code"].as<symbol_code>() == token_symbol.to_symbol_code()) 
+            if (v["account"].as<account_name>() == account &&
+                v["token_code"].as<symbol_code>() == token_symbol.to_symbol_code())
             {
                 return v;
             }
         }
         return variant();
     }
-    
+
     int64_t get_payout(symbol_code token_code, name grantor_name, name recipient_name) {
         return get_amount(token_code, grantor_name, recipient_name, _tester->get_all_chaindb_rows(_code, _code.value, N(provpayout), false));
     }

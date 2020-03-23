@@ -805,7 +805,7 @@ void stake::setinfo(name account, symbol_code token_code, string url, eosio::bin
     eosio::check(!info.has_value() || info->size() <= config::max_validator_meta_size, "info is too long");
     agents tbl(table_owner, table_owner.value);
     auto idx = tbl.get_index<"bykey"_n>();
-    auto agent = get_agent_itr(token_code, idx, account); // only syste
+    auto agent = get_agent_itr(token_code, idx, account);
     eosio::check(!agent->proxy_level, "only validator can set info");
 }
 

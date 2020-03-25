@@ -748,6 +748,7 @@ BOOST_FIXTURE_TEST_CASE(basic_test, cyber_stake_tester) try {
     install_contract(config::system_account_name, contracts::bios_wasm(), contracts::bios_abi());
     BOOST_CHECK_EQUAL(success(), bios.set_min_transaction_cpu_usage(500));
     stake.set_billed(1500, 1024);
+    token.set_billed(500, 1024);
     bios.set_billed(500, 1);
     int64_t stake_amount = 50000000000;
     size_t blocks_before_payout = 4;
@@ -780,6 +781,7 @@ BOOST_FIXTURE_TEST_CASE(basic_test, cyber_stake_tester) try {
     BOOST_TEST_MESSAGE("alice's resource balance = " << bios.get_account_balance(_alice));
     BOOST_CHECK_EQUAL(success(), stake.setproxylvl(_alice, token._symbol.to_symbol_code(), 2));
     BOOST_TEST_MESSAGE("alice's resource balance = " << bios.get_account_balance(_alice));
+    produce_block();
     BOOST_CHECK_EQUAL("explicitly_billed_exception", stake.setproxylvl(_alice, token._symbol.to_symbol_code(), 1));
     BOOST_TEST_MESSAGE("alice's resource balance = " << bios.get_account_balance(_alice));
 

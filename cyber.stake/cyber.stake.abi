@@ -1,0 +1,274 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ", 
+    "version": "cyberway::abi/1.1", 
+    "types": [], 
+    "structs": [{
+            "name": "claim", "base": "", 
+            "fields": [
+                {"name": "grantor_name", "type": "name"}, 
+                {"name": "recipient_name", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}
+            ]
+        }, {
+            "name": "create", "base": "", 
+            "fields": [
+                {"name": "token_symbol", "type": "symbol"}, 
+                {"name": "max_proxies", "type": "uint8[]"}, 
+                {"name": "depriving_window", "type": "int64"}, 
+                {"name": "min_own_staked_for_election", "type": "int64"}
+            ]
+        }, {
+            "name": "delegateuse", "base": "", 
+            "fields": [
+                {"name": "grantor_name", "type": "name"}, 
+                {"name": "recipient_name", "type": "name"}, 
+                {"name": "quantity", "type": "asset"}
+            ]
+        }, {
+            "name": "delegatevote", "base": "", 
+            "fields": [
+                {"name": "grantor_name", "type": "name"}, 
+                {"name": "recipient_name", "type": "name"}, 
+                {"name": "quantity", "type": "asset"}
+            ]
+        }, {
+            "name": "enable", "base": "", 
+            "fields": [
+                {"name": "token_code", "type": "symbol_code"}
+            ]
+        }, {
+            "name": "losses", "base": "", 
+            "fields": [
+                {"name": "id", "type": "uint64"}, 
+                {"name": "time", "type": "time_point_sec"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "total", "type": "int64"}
+            ]
+        }, {
+            "name": "open", "base": "", 
+            "fields": [
+                {"name": "owner", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "ram_payer", "type": "name?"}
+            ]
+        }, {
+            "name": "pair_name_int64", "base": "", 
+            "fields": [
+                {"name": "first", "type": "name"}, 
+                {"name": "second", "type": "int64"}
+            ]
+        }, {
+            "name": "pick", "base": "", 
+            "fields": [
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "accounts", "type": "name[]"}
+            ]
+        }, {
+            "name": "prov_payout_struct", "base": "", 
+            "fields": [
+                {"name": "id", "type": "uint64"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "grantor_name", "type": "name"}, 
+                {"name": "recipient_name", "type": "name"}, 
+                {"name": "amount", "type": "int64"}, 
+                {"name": "date", "type": "time_point_sec"}
+            ]
+        }, {
+            "name": "provision_struct", "base": "", 
+            "fields": [
+                {"name": "id", "type": "uint64"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "grantor_name", "type": "name"}, 
+                {"name": "recipient_name", "type": "name"}, 
+                {"name": "amount", "type": "int64"}
+            ]
+        }, {
+            "name": "recalluse", "base": "", 
+            "fields": [
+                {"name": "grantor_name", "type": "name"}, 
+                {"name": "recipient_name", "type": "name"}, 
+                {"name": "quantity", "type": "asset"}
+            ]
+        }, {
+            "name": "recallvote", "base": "", 
+            "fields": [
+                {"name": "grantor_name", "type": "name"}, 
+                {"name": "recipient_name", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "pct", "type": "int16"}
+            ]
+        }, {
+            "name": "returnlosses", "base": "", 
+            "fields": []
+        }, {
+            "name": "reward", "base": "", 
+            "fields": [
+                {"name": "rewards", "type": "pair_name_int64[]"}, 
+                {"name": "sym", "type": "symbol"}
+            ]
+        }, {
+            "name": "setautorc", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "break_fee_enabled", "type": "bool"}, 
+                {"name": "break_min_stake_enabled", "type": "bool"}
+            ]
+        }, {
+            "name": "setautorcmode", "base": "", 
+            "fields": [
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "enabled", "type": "bool"}
+            ]
+        }, {
+            "name": "setgrntterms", "base": "", 
+            "fields": [
+                {"name": "grantor_name", "type": "name"}, 
+                {"name": "recipient_name", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "pct", "type": "int16"}, 
+                {"name": "break_fee", "type": "int16"}, 
+                {"name": "break_min_own_staked", "type": "int64"}
+            ]
+        }, {
+            "name": "setkey", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "signing_key", "type": "public_key?"}
+            ]
+        }, {
+            "name": "setminstaked", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "min_own_staked", "type": "int64"}
+            ]
+        }, {
+            "name": "setproxyfee", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "fee", "type": "int16"}
+            ]
+        }, {
+            "name": "setproxylvl", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "level", "type": "uint8"}
+            ]
+        }, {
+            "name": "suspendcand", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}
+            ]
+        }, {
+            "name": "suspense", "base": "", 
+            "fields": [
+                {"name": "id", "type": "uint64"}, 
+                {"name": "token_code", "type": "symbol_code"}, 
+                {"name": "account", "type": "name"}, 
+                {"name": "action_name", "type": "name"}, 
+                {"name": "expiration_time", "type": "time_point_sec"}
+            ]
+        }, {
+            "name": "updatefunds", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "token_code", "type": "symbol_code"}
+            ]
+        }, {
+            "name": "withdraw", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "quantity", "type": "asset"}
+            ]
+        }
+    ], 
+    "actions": [
+        {"name": "claim", "type": "claim"}, 
+        {"name": "create", "type": "create"}, 
+        {"name": "delegateuse", "type": "delegateuse"}, 
+        {"name": "delegatevote", "type": "delegatevote"}, 
+        {"name": "enable", "type": "enable"}, 
+        {"name": "open", "type": "open"}, 
+        {"name": "pick", "type": "pick"}, 
+        {"name": "recalluse", "type": "recalluse"}, 
+        {"name": "recallvote", "type": "recallvote"}, 
+        {"name": "returnlosses", "type": "returnlosses"}, 
+        {"name": "reward", "type": "reward"}, 
+        {"name": "setautorc", "type": "setautorc"}, 
+        {"name": "setautorcmode", "type": "setautorcmode"}, 
+        {"name": "setgrntterms", "type": "setgrntterms"}, 
+        {"name": "setkey", "type": "setkey"}, 
+        {"name": "setminstaked", "type": "setminstaked"}, 
+        {"name": "setproxyfee", "type": "setproxyfee"}, 
+        {"name": "setproxylvl", "type": "setproxylvl"}, 
+        {"name": "suspendcand", "type": "suspendcand"}, 
+        {"name": "updatefunds", "type": "updatefunds"}, 
+        {"name": "withdraw", "type": "withdraw"}
+    ], 
+    "events": [], 
+    "tables": [{
+            "name": "losses", "type": "losses", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "id", "order": "asc"}
+                    ]
+                }
+            ]
+        }, {
+            "name": "provision", "type": "provision_struct", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "id", "order": "asc"}
+                    ]
+                }, {
+                    "name": "bykey", "unique": true, 
+                    "orders": [
+                        {"field": "token_code", "order": "asc"}, 
+                        {"field": "grantor_name", "order": "asc"}, 
+                        {"field": "recipient_name", "order": "asc"}
+                    ]
+                }
+            ]
+        }, {
+            "name": "provpayout", "type": "prov_payout_struct", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "id", "order": "asc"}
+                    ]
+                }, {
+                    "name": "bykey", "unique": true, 
+                    "orders": [
+                        {"field": "token_code", "order": "asc"}, 
+                        {"field": "grantor_name", "order": "asc"}, 
+                        {"field": "recipient_name", "order": "asc"}
+                    ]
+                }
+            ]
+        }, {
+            "name": "suspense", "type": "suspense", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "id", "order": "asc"}
+                    ]
+                }, {
+                    "name": "bykey", "unique": true, 
+                    "orders": [
+                        {"field": "token_code", "order": "asc"}, 
+                        {"field": "account", "order": "asc"}, 
+                        {"field": "action_name", "order": "asc"}
+                    ]
+                }
+            ]
+        }
+    ], 
+    "variants": []
+}

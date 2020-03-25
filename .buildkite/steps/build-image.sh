@@ -24,4 +24,4 @@ if [[ -z ${BUILDER_TAG+x} ]]; then
     docker pull cyberway/builder:${BUILDER_TAG}
 fi
 
-docker build -t cyberway/cyberway.contracts:${REVISION} --build-arg=version=${REVISION} --build-arg=cw_tag=${CW_TAG} --build-arg=cdt_tag=${CDT_TAG}  --build-arg=builder_tag=${BUILDER_TAG} -f Docker/Dockerfile .
+docker build -t cyberway/cyberway.contracts:${REVISION} --build-arg=version=${REVISION} --build-arg=cw_tag=${CW_TAG} --build-arg=cdt_tag=${CDT_TAG}  --build-arg=builder_tag=${BUILDER_TAG} --build-arg=ci_build=${CI} -f Docker/Dockerfile .

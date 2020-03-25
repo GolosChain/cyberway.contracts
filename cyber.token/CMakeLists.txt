@@ -1,4 +1,4 @@
-add_contract(cyber.token cyber.token ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.token.cpp)
+add_contract_with_checked_abi(cyber.token cyber.token cyber.token.abi ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.token.cpp)
 install_contract(cyber.token)
 
 target_include_directories(cyber.token.wasm

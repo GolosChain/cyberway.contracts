@@ -12,6 +12,8 @@ namespace eosio {
 namespace config {
     static constexpr size_t max_memo_size = 384;
     static constexpr char memo_error[] = "memo has more than 384 bytes";
+    const uint32_t seconds_per_day = 24 * 60 * 60; // TODO: move to some global consts
+    static constexpr uint32_t safe_max_delay = 30 * seconds_per_day; // max delay and max lock period
 }
 
 void token::send_currency_event(const currency_stats& stat) {
@@ -161,6 +163,16 @@ void token::sub_balance( name owner, asset value ) {
          a.balance -= value;
          send_balance_event(owner, a);
       });
+
+   check(!is_locked(_self, owner), "balance locked in safe");
+   if (from.safe.has_value()) {
+      from_acnts.modify(from, owner, [&](auto& a) {
+         auto safe = a.safe.value();
+         safe.unlocked -= value.amount;
+         check(safe.unlocked >= 0, "overdrawn safe unlocked balance");
+         a.safe.emplace(safe);
+      });
+   }
 }
 
 void token::add_balance( name owner, asset value, name ram_payer )
@@ -228,6 +240,7 @@ void token::close( name owner, const symbol& symbol )
    eosio::check( it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect." );
    eosio::check( it->balance.amount == 0, "Cannot close because the balance is not zero." );
    eosio::check( it->payments.amount == 0, "Cannot close because account has payments." );
+   eosio::check( !it->safe.has_value(), "Cannot close because safe enabled." );
    acnts.erase( it );
 }
 
@@ -278,6 +291,205 @@ void token::bulkpayment(name from, vector<recipient> recipients)
         eosio::check(temp_symbol == recipient_obj.quantity.symbol, "payment of different tokens is prohibited");
         do_transfer(from, recipient_obj.to, recipient_obj.quantity, recipient_obj.memo, true);
     }
+}
+
+////////////////////////////////////////////////////////////////
+// safe related actions
+using std::optional;
+
+void check_safe_params(name owner, optional<uint32_t> delay, optional<name> trusted) {
+   if (delay) {
+      check(*delay > 0, "delay must be > 0");
+      check(*delay <= config::safe_max_delay, "delay must be <= " + std::to_string(config::safe_max_delay));
+   }
+   if (trusted && *trusted != name()) {
+      check(owner != *trusted, "trusted and owner must be different accounts");
+      check(is_account(*trusted), "trusted account does not exist");
+   }
+}
+
+void token::enablesafe(name owner, asset unlock, uint32_t delay, name trusted) {
+   require_auth(owner);
+
+   check(unlock.amount >= 0, "unlock amount must be >= 0");
+   check_safe_params(owner, delay, trusted);
+   if (unlock.symbol != symbol{}) {
+      validate_symbol(_self, unlock);
+   }
+
+   accounts tbl(_self, owner.value);
+   const auto scode = unlock.symbol.code();
+   const auto& acc = tbl.get(scode.raw(), "no token account object found");
+   check(!acc.safe.has_value(), "safe already enabled");
+
+   // Do not allow to have delayed changes when enable the safe, they came from the previously enabled safe
+   // and should be cancelled to make clean safe setup.
+   safemod_tbl mods(_self, owner.value);
+   auto idx = mods.get_index<"bysymbolcode"_n>();
+   auto itr = idx.lower_bound(scode);
+   check(itr == idx.end() || itr->sym_code != scode, "can't enable safe with existing delayed mods");
+
+   tbl.modify(acc, owner, [&](auto& a) {
+      a.safe.emplace(safe_t{unlock.amount, delay, trusted});
+   });
+}
+
+template<typename Tbl, typename S>
+void instant_safe_change(Tbl& tbl, S& acc,
+   name owner, int64_t unlock, optional<uint32_t> delay, optional<name> trusted, bool ensure_change
+) {
+   if (delay && *delay == 0) {
+      check(!unlock && !trusted, "SYS: incorrect disabling safe mod");
+      tbl.modify(acc, owner, [](auto& a){
+         a.safe.reset();
+      });
+   } else {
+      bool changed = !ensure_change;
+      auto safe = acc.safe.value();
+      if (unlock) {
+            safe.unlocked += unlock;
+            check(safe.unlocked >= 0 && safe.unlocked <= asset::max_amount, "unlocked overflow");
+            changed = true;
+      }
+      if (delay && *delay != safe.delay) {
+            safe.delay = *delay;
+            changed = true;
+      }
+      if (trusted && *trusted != safe.trusted) {
+            safe.trusted = *trusted;
+            changed = true;
+      }
+      check(changed, "change has no effect and can be cancelled");
+      tbl.modify(acc, owner, [&](auto& a) {
+         a.safe.emplace(safe);
+      });
+   }
+}
+
+// helper for actions which do not change `unlocked` and have incomplete asset symbol
+void token::delay_safe_change(
+   name owner, symbol_code scode, name mod_id, optional<uint32_t> delay, optional<name> trusted,
+   bool check_params/*=true*/
+) {
+   const asset fake_asset{0, symbol{scode, 0}};
+   delay_safe_change(owner, fake_asset, mod_id, delay, trusted, check_params, false);
+}
+
+void token::delay_safe_change(
+   name owner, asset unlock, name mod_id, optional<uint32_t> delay, optional<name> trusted,
+   bool check_params/*=true*/, bool check_sym/*=true*/
+) {
+   if (check_params) {
+      check_safe_params(owner, delay, trusted);
+   }
+   if (check_sym) {
+      validate_symbol(_self, unlock);
+   }
+
+   const auto scode = unlock.symbol.code();
+   accounts tbl(_self, owner.value);
+   const auto& acc = tbl.get(scode.raw(), "no token account object found");
+   check(acc.safe.has_value(), "safe disabled");
+   auto safe = acc.safe.value();
+
+   const bool have_id = mod_id != name();
+   const auto trusted_acc = safe.trusted;
+   if (trusted_acc != name() && has_auth(trusted_acc)) {
+      check(!have_id, "mod_id must be empty for trusted action");
+      check(!delay || *delay != safe.delay, "can't set same delay");
+      check(!trusted || *trusted != trusted_acc, "can't set same trusted");
+      instant_safe_change(tbl, acc, owner, unlock.amount, delay, trusted, false);
+   } else {
+      check(have_id, "mod_id must not be empty");
+      safemod_tbl mods(_self, owner.value);
+      check(mods.find(mod_id.value) == mods.end(), "safe mod with the same id is already exists");
+      mods.emplace(owner, [&](auto& d) {
+         d.id = mod_id;
+         d.sym_code = scode;
+         d.date = eosio::current_time_point() + eosio::seconds(safe.delay);
+         d.unlock = unlock.amount;
+         d.delay = delay;
+         d.trusted = trusted;
+      });
+   }
+}
+
+void token::disablesafe(name owner, symbol_code sym_code, name mod_id) {
+   require_auth(owner);
+   delay_safe_change(owner, sym_code, mod_id, 0, {}, false);
+}
+
+void token::unlocksafe(name owner, asset unlock, name mod_id) {
+   require_auth(owner);
+   check(unlock.amount > 0, "unlock amount must be > 0");
+   delay_safe_change(owner, unlock, mod_id, {}, {});
+}
+
+void token::locksafe(name owner, asset lock) {
+   require_auth(owner);
+   check(lock.amount >= 0, "lock amount must be >= 0");
+   validate_symbol(_self, lock); // checked within "<= unlocked", but have confusing message, so check here
+
+   const auto scode = lock.symbol.code();
+   accounts tbl(_self, owner.value);
+   const auto& acc = tbl.get(scode.raw(), "no token account object found");
+   check(acc.safe.has_value(), "safe disabled");
+   auto safe = acc.safe.value();
+   check(safe.unlocked > 0, "nothing to lock");
+   check(safe.unlocked >= lock.amount, "lock must be <= unlocked");
+
+   bool lock_all = lock.amount == 0;
+   tbl.modify(acc, owner, [&](auto& a) {
+      auto safe = a.safe.value();
+      safe.unlocked -= lock_all ? safe.unlocked : lock.amount;
+      a.safe.emplace(safe);
+   });
+}
+
+void token::modifysafe(
+   name owner, symbol_code sym_code, name mod_id, optional<uint32_t> delay, optional<name> trusted
+) {
+   require_auth(owner);
+   check(delay || trusted, "delay and/or trusted must be set");
+   delay_safe_change(owner, sym_code, mod_id, delay, trusted);
+}
+
+void token::applysafemod(name owner, name mod_id) {
+   require_auth(owner);
+   safemod_tbl mods(_self, owner.value);
+   const auto& mod = mods.get(mod_id.value, "safe mod not found");
+
+   accounts tbl(_self, owner.value);
+   const auto& acc = tbl.get(mod.sym_code.raw(), "no token account object found");
+   check(acc.safe.has_value(), "safe disabled");
+   const auto& safe = acc.safe.value();
+
+   bool trusted_apply = safe.trusted != name() && has_auth(safe.trusted);
+   if (!trusted_apply) {
+      check(mod.date <= eosio::current_time_point(), "safe change is time locked");
+      check(!is_locked(_self, owner), "safe locked globally");
+   }
+   instant_safe_change(tbl, acc, owner, mod.unlock, mod.delay, mod.trusted, true);
+   mods.erase(mod);
+}
+
+void token::cancelsafemod(name owner, name mod_id) {
+   require_auth(owner);
+   safemod_tbl mods(_self, owner.value);
+   const auto& mod = mods.get(mod_id.value, "safe mod not found");
+   mods.erase(mod);
+}
+
+void token::globallock(name owner, uint32_t period) {
+   require_auth(owner);
+   check(period > 0, "period must be > 0");
+   check(period <= config::safe_max_delay, "period must be <= " + std::to_string(config::safe_max_delay));
+
+   time_point_sec unlocks{eosio::current_time_point() + eosio::seconds(period)};
+   lock_singleton lock(_self, owner.value);
+   check(unlocks > lock.get_or_default().unlocks, "new unlock time must be greater than current");
+
+   lock.set({unlocks}, owner);
 }
 
 } /// namespace eosio

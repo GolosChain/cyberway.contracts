@@ -10,10 +10,13 @@
 
 #ifdef UNIT_TEST_ENV
 #   include <eosio/chain/types.hpp>
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-string-literal-operator-template"
 template <typename T, T... Str>
 inline eosio::chain::name operator ""_n() {
-   return eosio::chain::name({Str...});
+    return eosio::chain::name({Str...});
 }
+#pragma clang diagnostic pop
 #endif
 
 #define CYBER_TOKEN "cyber.token"

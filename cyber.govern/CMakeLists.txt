@@ -1,4 +1,4 @@
-add_contract(cyber.govern cyber.govern ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.govern.cpp)
+add_contract_with_checked_abi(cyber.govern cyber.govern cyber.govern.abi ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.govern.cpp)
 install_contract(cyber.govern)
 
 target_include_directories(cyber.govern.wasm

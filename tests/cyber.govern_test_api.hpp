@@ -24,8 +24,9 @@ public:
      ////tables
     
     int64_t get_balance(account_name account, bool confirmed = true) {
-        auto s = get_struct(_code, confirmed ? N(balance) : N(uncbalance), account.value, "balance_struct");
-        return !s.is_null() ? s["amount"].as<int64_t>() : -1;
+        auto s = get_struct(_code, N(producer), account.value, "producer_struct");
+        auto r = !s.is_null() ? s[confirmed ? "amount" : "unconfirmed_amount"].as<int64_t>() : -1;
+        return (!r) ? (-1) : r;
     }
     
     variant get_state()const {
@@ -98,7 +99,7 @@ public:
         BOOST_REQUIRE_EQUAL(_tester->control->head_block_header().schedule_version, prev_version);
         BOOST_REQUIRE_EQUAL(get_block_offset(), prev_block_offset);
         
-        BOOST_REQUIRE(_tester->control->pending_block_state()->active_schedule.version == prev_version + static_cast<int>(change_version));
+        BOOST_REQUIRE_EQUAL(_tester->control->pending_block_state()->active_schedule.version, prev_version + static_cast<int>(change_version));
         auto ret = _tester->control->head_block_num() - prev_block;
         BOOST_TEST_MESSAGE("--- waited " << ret << " more blocks for schedule activation");
         ret += blocks_for_update;

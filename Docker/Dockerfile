@@ -13,6 +13,8 @@ ENV CYBERWAY /opt/cyberway/
 
 COPY . /cyberway.contracts
 
+ARG ci_build
+
 RUN ldconfig && cd cyberway.contracts \
     && cmake -H. -B"build" \
         -GNinja \
@@ -20,6 +22,7 @@ RUN ldconfig && cd cyberway.contracts \
         -DCMAKE_INSTALL_PREFIX=/opt/cyberway.contracts/ \
         -Dcyberway.cdt_DIR=/opt/cyberway.cdt/lib/cmake/cyberway.cdt \
         -DEOSIO_ROOT=$CYBERWAY \
+        -DABICHECK=$ci_build \
     && cmake --build build --target install
 
 FROM ubuntu:18.04

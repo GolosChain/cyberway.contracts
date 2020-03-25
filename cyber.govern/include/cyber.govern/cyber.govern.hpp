@@ -4,6 +4,7 @@
 #include <eosio/time.hpp>
 #include <eosio/crypto.hpp>
 #include <cyber.govern/config.hpp>
+#include <eosio/binary_extension.hpp>
 
 namespace cyber {
 using eosio::name;
@@ -22,13 +23,13 @@ struct structures {
         uint32_t last_propose_block_num = 0;
         uint16_t required_producers_num = config::min_producers_num;
         uint16_t last_producers_num = 1;
+
+        // using of binary_extension is a temporary decision only for upgrade phase
+        eosio::binary_extension<uint32_t, eosio::write_strategy::no_value> schedule_version;
+        eosio::binary_extension<int8_t, eosio::write_strategy::no_value> resize_shift;
+        eosio::binary_extension<time_point_sec, eosio::write_strategy::no_value> last_resize_step;
     };
-    
-    struct schedule_resize_info {
-        time_point_sec last_step;
-        int8_t shift = 1;
-    };
-    
+
     struct [[using eosio: event("burnreward"), contract("cyber.govern")]] balance_struct {
         name account;
         int64_t amount;
@@ -37,42 +38,39 @@ struct structures {
     
     struct producer_struct {
         name account;
+        bool is_oblidged = false;
+        int64_t amount = 0;
+        int64_t unconfirmed_amount = 0;
+        uint16_t omission_count = 0;
+        uint16_t omission_resets = 0;
+        eosio::time_point_sec last_time;
+
         uint64_t primary_key()const { return account.value; }
-    };
-    
-    struct pending_producers_info {
-        std::vector<name> accounts;
-    };
-    
-    struct omission_struct {
-        name account;
-        uint16_t count;
-        uint16_t resets = 0;
-        uint64_t primary_key()const { return account.value; }
-        uint16_t by_count()const { return count; }
+        bool by_oblidged()const { return is_oblidged; }
+        int64_t by_amount()const { return amount; }
+        eosio::time_point_sec by_last_time()const { return last_time; }
     };
 };
 
     using state_singleton [[eosio::order("id","asc")]] = eosio::singleton<"governstate"_n, structures::state_info>;
-    using schedule_resize_singleton [[eosio::order("id","asc")]] = eosio::singleton<"schedresize"_n, structures::schedule_resize_info>;
     using balances [[eosio::order("account","asc")]] = eosio::multi_index<"balance"_n, structures::balance_struct>;
-    using unconfirmed_balances [[eosio::order("account","asc")]] = eosio::multi_index<"uncbalance"_n, structures::balance_struct>;
-    using obliged_producers [[eosio::order("account","asc")]] = eosio::multi_index<"obligedprod"_n, structures::producer_struct>;
-    using pending_producers [[eosio::order("id","asc")]] = eosio::singleton<"pendingprods"_n, structures::pending_producers_info>;
+
+    using oblidged_index [[using eosio: order("is_oblidged","desc"), non_unique]] = eosio::indexed_by<"byoblidged"_n, eosio::const_mem_fun<structures::producer_struct, bool, &structures::producer_struct::by_oblidged> >;
+    using balance_index [[using eosio: order("amount","desc"), non_unique]] = eosio::indexed_by<"bybalance"_n, eosio::const_mem_fun<structures::producer_struct, int64_t, &structures::producer_struct::by_amount> >;
+    using last_time_index [[using eosio: order("last_time","asc"), non_unique]] = eosio::indexed_by<"bytime"_n, eosio::const_mem_fun<structures::producer_struct, eosio::time_point_sec, &structures::producer_struct::by_last_time> >;
+    using producers [[eosio::order("account","asc")]] = eosio::multi_index<"producer"_n, structures::producer_struct, oblidged_index, balance_index, last_time_index>;
     
-    using omission_count_index [[using eosio: order("count","desc"), non_unique]] = eosio::indexed_by<"bycount"_n, eosio::const_mem_fun<structures::omission_struct, uint16_t, &structures::omission_struct::by_count> >;
-    using omissions [[eosio::order("account","asc")]] = eosio::multi_index<"omission"_n, structures::omission_struct, omission_count_index>;
-    
-    void maybe_promote_producers();
+    void promote_producers(producers& producers_table);
     void propose_producers(structures::state_info& s);
-    void reward_producers(balances& balances_table, structures::state_info& s);
+    void reward_producers(producers& producers_table, structures::state_info& s);
     void reward_workers(structures::state_info& s);
+    void burn_reward(const eosio::name& account, const int64_t& amount) const;
+    void remove_old_producers(producers& producers_table);
     int64_t get_target_emission_per_block(int64_t supply) const;
     
 public:
     using contract::contract;
-    [[eosio::action]] void onblock(name producer);
-    [[eosio::action]] void setactprods(std::vector<name> pending_active_producers);
+    [[eosio::action]] void onblock(name producer, eosio::binary_extension<uint32_t> schedule_version);
     [[eosio::action]] void setshift(int8_t shift);
 };
 

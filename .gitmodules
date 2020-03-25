@@ -1,0 +1,3 @@
+[submodule "scripts/deployutils"]
+	path = scripts/deployutils
+	url = https://github.com/cyberway/deployutils.git

@@ -1,0 +1,10 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ", 
+    "version": "cyberway::abi/1.1", 
+    "types": [], 
+    "structs": [], 
+    "actions": [], 
+    "events": [], 
+    "tables": [], 
+    "variants": []
+}

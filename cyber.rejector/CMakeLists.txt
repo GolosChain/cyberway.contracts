@@ -1,4 +1,4 @@
-add_contract(cyber.rejector cyber.rejector ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.rejector.cpp)
+add_contract_with_checked_abi(cyber.rejector cyber.rejector cyber.rejector.abi ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.rejector.cpp)
 install_contract(cyber.rejector)
 
 target_include_directories(cyber.rejector.wasm

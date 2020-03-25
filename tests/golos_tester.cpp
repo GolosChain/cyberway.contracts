@@ -79,7 +79,8 @@ base_tester::action_result golos_tester::push_action_msig_tx(
     action_name name,
     vector<permission_level> perms,
     vector<account_name> signers,
-    const variant_object& data
+    const variant_object& data,
+    bool produce/*=true*/
 ) {
     auto& abi = _abis[code];
     action act;
@@ -96,10 +97,10 @@ base_tester::action_result golos_tester::push_action_msig_tx(
     for (const auto& a : signers) {
         tx.sign(get_private_key(a, "active"), control->get_chain_id());
     }
-    return push_tx(std::move(tx));
+    return push_tx(std::move(tx), produce);
 }
 
-base_tester::action_result golos_tester::push_tx(signed_transaction&& tx) {
+base_tester::action_result golos_tester::push_tx(signed_transaction&& tx, bool produce_and_check) {
     try {
         push_transaction(tx);
     } catch (const fc::exception& ex) {
@@ -107,8 +108,10 @@ base_tester::action_result golos_tester::push_tx(signed_transaction&& tx) {
         return error(ex.top_message()); // top_message() is assumed by many tests; otherwise they fail
         //return error(ex.to_detail_string());
     }
-    produce_block();
-    BOOST_REQUIRE_EQUAL(true, chain_has_transaction(tx.id()));
+    if (produce_and_check) {
+        produce_block();
+        BOOST_REQUIRE_EQUAL(true, chain_has_transaction(tx.id()));
+    }
     return success();
 }
 

@@ -1,0 +1,102 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ", 
+    "version": "cyberway::abi/1.1", 
+    "types": [], 
+    "structs": [{
+            "name": "balance_struct", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "amount", "type": "int64"}
+            ]
+        }, {
+            "name": "onblock", "base": "", 
+            "fields": [
+                {"name": "producer", "type": "name"}, 
+                {"name": "schedule_version", "type": "uint32$"}
+            ]
+        }, {
+            "name": "producer_struct", "base": "", 
+            "fields": [
+                {"name": "account", "type": "name"}, 
+                {"name": "is_oblidged", "type": "bool"}, 
+                {"name": "amount", "type": "int64"}, 
+                {"name": "unconfirmed_amount", "type": "int64"}, 
+                {"name": "omission_count", "type": "uint16"}, 
+                {"name": "omission_resets", "type": "uint16"}, 
+                {"name": "last_time", "type": "time_point_sec"}
+            ]
+        }, {
+            "name": "setshift", "base": "", 
+            "fields": [
+                {"name": "shift", "type": "int8"}
+            ]
+        }, {
+            "name": "state_info", "base": "", 
+            "fields": [
+                {"name": "id", "type": "uint64"}, 
+                {"name": "last_schedule_increase", "type": "time_point_sec"}, 
+                {"name": "block_num", "type": "uint32"}, 
+                {"name": "target_emission_per_block", "type": "int64"}, 
+                {"name": "funds", "type": "int64"}, 
+                {"name": "last_propose_block_num", "type": "uint32"}, 
+                {"name": "required_producers_num", "type": "uint16"}, 
+                {"name": "last_producers_num", "type": "uint16"}, 
+                {"name": "schedule_version", "type": "uint32$"}, 
+                {"name": "resize_shift", "type": "int8$"}, 
+                {"name": "last_resize_step", "type": "time_point_sec$"}
+            ]
+        }
+    ], 
+    "actions": [
+        {"name": "onblock", "type": "onblock"}, 
+        {"name": "setshift", "type": "setshift"}
+    ], 
+    "events": [
+        {"name": "burnreward", "type": "balance_struct"}
+    ], 
+    "tables": [{
+            "name": "balance", "type": "balance_struct", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "account", "order": "asc"}
+                    ]
+                }
+            ]
+        }, {
+            "name": "governstate", "type": "state_info", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "id", "order": "asc"}
+                    ]
+                }
+            ]
+        }, {
+            "name": "producer", "type": "producer_struct", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "account", "order": "asc"}
+                    ]
+                }, {
+                    "name": "byoblidged", "unique": false, 
+                    "orders": [
+                        {"field": "is_oblidged", "order": "desc"}
+                    ]
+                }, {
+                    "name": "bybalance", "unique": false, 
+                    "orders": [
+                        {"field": "amount", "order": "desc"}
+                    ]
+                }, {
+                    "name": "bytime", "unique": false, 
+                    "orders": [
+                        {"field": "last_time", "order": "asc"}
+                    ]
+                }
+            ]
+        }
+    ], 
+    "variants": []
+}

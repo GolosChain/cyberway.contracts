@@ -1,4 +1,4 @@
-add_contract(cyber.bios cyber.bios ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.bios.cpp)
+add_contract_with_checked_abi(cyber.bios cyber.bios cyber.bios.abi ${CMAKE_CURRENT_SOURCE_DIR}/src/cyber.bios.cpp)
 install_contract(cyber.bios)
 
 target_include_directories(cyber.bios.wasm

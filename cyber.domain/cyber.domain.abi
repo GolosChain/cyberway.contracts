@@ -1,0 +1,144 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ", 
+    "version": "cyberway::abi/1.1", 
+    "types": [
+        {"new_type_name": "domain_name", "type": "string"}, 
+        {"new_type_name": "username", "type": "string"}
+    ], 
+    "structs": [{
+            "name": "biddmrefund", "base": "", 
+            "fields": [
+                {"name": "bidder", "type": "name"}
+            ]
+        }, {
+            "name": "biddomain", "base": "", 
+            "fields": [
+                {"name": "bidder", "type": "name"}, 
+                {"name": "name", "type": "domain_name"}, 
+                {"name": "bid", "type": "asset"}
+            ]
+        }, {
+            "name": "checkwin", "base": "", 
+            "fields": []
+        }, {
+            "name": "declarenames", "base": "", 
+            "fields": [
+                {"name": "domains", "type": "name_info[]"}
+            ]
+        }, {
+            "name": "domain_bid", "base": "", 
+            "fields": [
+                {"name": "id", "type": "uint64"}, 
+                {"name": "name", "type": "domain_name"}, 
+                {"name": "high_bidder", "type": "name"}, 
+                {"name": "high_bid", "type": "int64"}, 
+                {"name": "last_bid_time", "type": "time_point_sec"}
+            ]
+        }, {
+            "name": "domain_bid_refund", "base": "", 
+            "fields": [
+                {"name": "bidder", "type": "name"}, 
+                {"name": "amount", "type": "asset"}
+            ]
+        }, {
+            "name": "domain_bid_state", "base": "", 
+            "fields": [
+                {"name": "id", "type": "uint64"}, 
+                {"name": "last_win", "type": "time_point_sec"}
+            ]
+        }, {
+            "name": "linkdomain", "base": "", 
+            "fields": [
+                {"name": "owner", "type": "name"}, 
+                {"name": "to", "type": "name"}, 
+                {"name": "name", "type": "string"}
+            ]
+        }, {
+            "name": "name_info", "base": "", 
+            "fields": [
+                {"name": "domain", "type": "domain_name"}, 
+                {"name": "account", "type": "name"}, 
+                {"name": "users", "type": "username[]"}
+            ]
+        }, {
+            "name": "newdomain", "base": "", 
+            "fields": [
+                {"name": "creator", "type": "name"}, 
+                {"name": "name", "type": "domain_name"}
+            ]
+        }, {
+            "name": "newusername", "base": "", 
+            "fields": [
+                {"name": "creator", "type": "name"}, 
+                {"name": "owner", "type": "name"}, 
+                {"name": "name", "type": "string"}
+            ]
+        }, {
+            "name": "passdomain", "base": "", 
+            "fields": [
+                {"name": "from", "type": "name"}, 
+                {"name": "to", "type": "name"}, 
+                {"name": "name", "type": "string"}
+            ]
+        }, {
+            "name": "unlinkdomain", "base": "", 
+            "fields": [
+                {"name": "owner", "type": "name"}, 
+                {"name": "name", "type": "string"}
+            ]
+        }
+    ], 
+    "actions": [
+        {"name": "biddmrefund", "type": "biddmrefund"}, 
+        {"name": "biddomain", "type": "biddomain"}, 
+        {"name": "checkwin", "type": "checkwin"}, 
+        {"name": "declarenames", "type": "declarenames"}, 
+        {"name": "linkdomain", "type": "linkdomain"}, 
+        {"name": "newdomain", "type": "newdomain"}, 
+        {"name": "newusername", "type": "newusername"}, 
+        {"name": "passdomain", "type": "passdomain"}, 
+        {"name": "unlinkdomain", "type": "unlinkdomain"}
+    ], 
+    "events": [], 
+    "tables": [{
+            "name": "dbidrefund", "type": "domain_bid_refund", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "bidder", "order": "asc"}
+                    ]
+                }
+            ]
+        }, {
+            "name": "dbidstate", "type": "domain_bid_state", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "id", "order": "asc"}
+                    ]
+                }
+            ]
+        }, {
+            "name": "domainbid", "type": "domain_bid", 
+            "indexes": [{
+                    "name": "primary", "unique": true, 
+                    "orders": [
+                        {"field": "id", "order": "asc"}
+                    ]
+                }, {
+                    "name": "domain", "unique": true, 
+                    "orders": [
+                        {"field": "name", "order": "asc"}
+                    ]
+                }, {
+                    "name": "highbid", "unique": true, 
+                    "orders": [
+                        {"field": "high_bid", "order": "desc"}, 
+                        {"field": "name", "order": "asc"}
+                    ]
+                }
+            ]
+        }
+    ], 
+    "variants": []
+}

@@ -19,10 +19,11 @@ inline account_name user_name(size_t n) {
         ret_str += std::string(1, 'a' + n % q);
         n /= q;
     }
-    return string_to_name(ret_str.c_str()); 
-}; 
+    return string_to_name(ret_str.c_str());
+};
 
 struct base_contract_api {
+    using signers_t = std::vector<account_name>;
 protected:
     uint32_t billed_cpu_time_us = base_tester::DEFAULT_BILLED_CPU_TIME_US;
     uint64_t billed_ram_bytes = base_tester::DEFAULT_BILLED_RAM_BYTES;
@@ -32,7 +33,15 @@ public:
 
     base_contract_api(golos_tester* tester, name code): _tester(tester), _code(code) {}
 
-    base_tester::action_result push_msig(action_name name, std::vector<permission_level> perms, std::vector<account_name> signers,
+    base_tester::action_result push_msig(action_name name, signers_t signers, const variant_object& data) {
+        std::vector<permission_level> perms{signers.size()};
+        std::transform(signers.begin(), signers.end(), perms.begin(), [](const auto& s){
+            return permission_level{s, config::active_name};
+        });
+        return _tester->push_action_msig_tx(_code, name, perms, signers, data, false); // NOTE: doesn't produce block
+    }
+
+    base_tester::action_result push_msig(action_name name, std::vector<permission_level> perms, signers_t signers,
         const variant_object& data
     ) {
         return _tester->push_action_msig_tx(_code, name, perms, signers, data);
@@ -40,6 +49,10 @@ public:
 
     variant get_struct(uint64_t scope, name tbl, uint64_t id, const string& name) const {
         return _tester->get_chaindb_struct(_code, scope, tbl, id, name);
+    }
+
+    variant get_singleton(uint64_t scope, name tbl, const string& name) const {
+        return _tester->get_chaindb_singleton(_code, scope, tbl, name);
     }
 
     virtual mvo args() {

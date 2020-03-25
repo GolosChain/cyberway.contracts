@@ -118,7 +118,8 @@ public:
         produce_block();
         auto emission = get_emission_per_block(rate);
         BOOST_CHECK_EQUAL(govern.get_target_emission_per_block(), emission);
-        BOOST_CHECK_EQUAL(govern.get_balance(_alice),
+        auto alice_balance = govern.get_balance(_alice);
+        BOOST_CHECK_EQUAL(alice_balance == -1 ? 0 : alice_balance,
             supply_amount != max_supply_amount ? safe_pct<int64_t>(cfg::block_reward_pct, emission) : 0);
         produce_block();
     }
@@ -270,10 +271,10 @@ BOOST_FIXTURE_TEST_CASE(no_rewards_test, cyber_govern_tester) try {
     BOOST_CHECK(stake.get_agent(_whale, token._symbol)["balance"].as<int64_t>() > init_amount);
     BOOST_CHECK_EQUAL(stake.get_candidate(_bob, token._symbol)["signing_key"].as<public_key_type>(), public_key_type());
     
-    BOOST_CHECK(govern.get_balance(_alice, false) > 0);
+    BOOST_CHECK_GT(govern.get_balance(_alice, false), 0);
     BOOST_CHECK_EQUAL(govern.get_balance(_bob, false), -1);
-    BOOST_CHECK(govern.get_balance(_carol, false) > 0);
-    BOOST_CHECK(govern.get_balance(_whale, false) > 0);
+    BOOST_CHECK_GT(govern.get_balance(_carol, false), 0);
+    BOOST_CHECK_GT(govern.get_balance(_whale, false), 0);
     
     BOOST_CHECK_EQUAL(govern.get_balance(_alice), -1);
     BOOST_CHECK_EQUAL(govern.get_balance(_bob), -1);
@@ -413,6 +414,7 @@ BOOST_FIXTURE_TEST_CASE(producer_replacement, cyber_govern_tester) try {
         BOOST_CHECK_EQUAL(stake.get_candidate(cur_producers[p], token._symbol)["signing_key"].as<public_key_type>(), get_public_key(cur_producers[p], "active"));
     }
     govern.wait_schedule_activation(true, {cur_producers[0]});
+    produce_block(); // producer key resetting happens on the second block of the schedule round
     BOOST_CHECK_EQUAL(govern.get_active_producers(), govern.make_producers_group(cur_producers));
     BOOST_CHECK_EQUAL(stake.get_candidate(cur_producers[0], token._symbol)["signing_key"].as<public_key_type>(), public_key_type());
     for (size_t p = 1; p < cur_producers.size(); p++) {

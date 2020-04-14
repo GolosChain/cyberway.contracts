@@ -98,6 +98,11 @@
                 {"name": "permission", "type": "name"}
             ]
         }, {
+            "name": "initautorc", "base": "", 
+            "fields": [
+                {"name": "enable", "type": "bool"}
+            ]
+        }, {
             "name": "key_weight", "base": "", 
             "fields": [
                 {"name": "key", "type": "public_key"}, 
@@ -233,6 +238,7 @@
         {"name": "checkversion", "type": "checkversion"}, 
         {"name": "checkwin", "type": "checkwin"}, 
         {"name": "deleteauth", "type": "deleteauth"}, 
+        {"name": "initautorc", "type": "initautorc"}, 
         {"name": "linkauth", "type": "linkauth"}, 
         {"name": "newaccount", "type": "newaccount"}, 
         {"name": "onblock", "type": "onblock"}, 

@@ -170,6 +170,24 @@ void bios::newaccount(name creator, name newact, ignore<authority> owner, ignore
     }
 }
 
+void bios::initautorc(bool enable) {
+    require_auth(producers_name);
+
+    action(
+        permission_level{"cyber"_n, active_name},
+        "cyber"_n, "linkauth"_n,
+        std::make_tuple("cyber"_n, "cyber.stake"_n, "setautorcmode"_n, "prods"_n)
+    ).send();
+
+    if(enable) {
+        action(
+            permission_level{"cyber"_n, active_name},
+            "cyber.stake"_n, "setautorcmode"_n,
+            std::make_tuple(symbol_code("CYBER"), true)
+        ).send();
+    }
+}
+
 void bios::check_stake(name account) {
     auto token_code = system_token.code();
     auto cost = eosio::get_used_resources_cost(account);

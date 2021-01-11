@@ -49,16 +49,7 @@
         {"name": "burnreward", "type": "balance_struct"}
     ], 
     "tables": [{
-            "name": "balance", "type": "balance_struct", 
-            "indexes": [{
-                    "name": "primary", "unique": true, 
-                    "orders": [
-                        {"field": "account", "order": "asc"}
-                    ]
-                }
-            ]
-        }, {
-            "name": "governstate", "type": "state_info", 
+            "name": "governstate", "type": "state_info",
             "indexes": [{
                     "name": "primary", "unique": true, 
                     "orders": [

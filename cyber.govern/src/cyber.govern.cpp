@@ -102,30 +102,6 @@ void govern::reward_producers(producers& producers_table, structures::state_info
     unconfirmed_rewards.reserve(config::max_producers_num + 16);
     rewards.reserve(config::max_producers_num + 16);
 
-    // the temporary decision only for the upgrade phase,
-    //   the balances table can be removed after migrating to the producers table
-    boost::container::flat_map<eosio::name, int64_t> old_rewards;
-    balances balances_table(_self, _self.value);
-
-    old_rewards.reserve(config::max_producers_num + 16);
-    for (auto itr = balances_table.begin(); itr != balances_table.end();) {
-        if (itr->amount) {
-            old_rewards.emplace(itr->account, itr->amount);
-        }
-        itr = balances_table.erase(itr);
-    }
-
-    auto get_old_reward = [&](const eosio::name& account) -> int64_t {
-        int64_t amount = 0;
-        auto itr = old_rewards.find(account);
-        if (old_rewards.end() != itr) {
-            amount = itr->second;
-            old_rewards.erase(itr);
-        }
-        return amount;
-    };
-    // end of the temporary decision
-
     auto top = stake::get_top(system_token.code(), s.required_producers_num + rewarded_for_votes_limit_displ, 0);
     int64_t votes_sum = 0;
     for (const auto& t : top) {
@@ -159,7 +135,7 @@ void govern::reward_producers(producers& producers_table, structures::state_info
 
         for (auto& r: unconfirmed_rewards) {
             auto btr = producers_table.find(r.first.value);
-            int64_t amount = get_old_reward(r.first);
+            int64_t amount = 0;
 
             if (btr != producers_table.end()) {
                 producers_table.modify(btr, name(), [&](auto& b) {
@@ -183,7 +159,7 @@ void govern::reward_producers(producers& producers_table, structures::state_info
 
     auto balances_idx = producers_table.get_index<"bybalance"_n>();
     for (auto itr = balances_idx.begin(); itr != balances_idx.end() && itr->amount; ++itr) {
-        rewards.emplace_back(itr->account, itr->amount + get_old_reward(itr->account));
+        rewards.emplace_back(itr->account, itr->amount);
         balances_idx.modify(itr, eosio::same_payer, [&](auto& u){
             u.amount = 0;
         });

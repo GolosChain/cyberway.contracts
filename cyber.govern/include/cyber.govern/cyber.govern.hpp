@@ -35,7 +35,7 @@ struct structures {
         int64_t amount;
         uint64_t primary_key()const { return account.value; }
     };
-    
+
     struct producer_struct {
         name account;
         bool is_oblidged = false;
@@ -53,7 +53,6 @@ struct structures {
 };
 
     using state_singleton [[eosio::order("id","asc")]] = eosio::singleton<"governstate"_n, structures::state_info>;
-    using balances [[eosio::order("account","asc")]] = eosio::multi_index<"balance"_n, structures::balance_struct>;
 
     using oblidged_index [[using eosio: order("is_oblidged","desc"), non_unique]] = eosio::indexed_by<"byoblidged"_n, eosio::const_mem_fun<structures::producer_struct, bool, &structures::producer_struct::by_oblidged> >;
     using balance_index [[using eosio: order("amount","desc"), non_unique]] = eosio::indexed_by<"bybalance"_n, eosio::const_mem_fun<structures::producer_struct, int64_t, &structures::producer_struct::by_amount> >;

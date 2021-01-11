@@ -105,17 +105,6 @@ public:
         ret += blocks_for_update;
         return ret;
     }
-    
-    action_result set_shift(int8_t shift) {
-        std::vector<account_name> signers;
-        std::vector<permission_level> perms;
-        for (const auto& k : _tester->control->pending_block_state()->active_schedule.producers) {
-            signers.emplace_back(k.producer_name);
-            perms.emplace_back(permission_level{k.producer_name, config::active_name});
-        }
-        perms.emplace_back(permission_level{config::producers_account_name, config::active_name});
-        return push_msig(N(setshift), perms, signers, args()("shift", shift));
-    }
 };
 
 }} // eosio::testing

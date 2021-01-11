@@ -165,10 +165,6 @@ void govern::reward_producers(producers& producers_table, structures::state_info
         });
     }
 
-    for (const auto& r: old_rewards) {
-        rewards.emplace_back(r.first, r.second);
-    }
-
     if (rewards.size()) {
         INLINE_ACTION_SENDER(cyber::stake, reward)(config::stake_name, {config::issuer_name, config::active_name},
             {rewards, system_token});
@@ -183,7 +179,9 @@ void govern::propose_producers(structures::state_info& s) {
     }
 
     if ((eosio::current_time_point() - s.last_resize_step.value()).to_seconds() >= schedule_resize_min_delay) {
-        s.required_producers_num = std::min(std::max(s.last_producers_num + 1, min_producers_num), max_producers_num);
+        s.required_producers_num = s.last_producers_num;
+        s.required_producers_num++;
+        s.required_producers_num = std::min(std::max(s.required_producers_num, min_producers_num), max_producers_num);
         s.last_resize_step.emplace(eosio::current_time_point());
     }
 

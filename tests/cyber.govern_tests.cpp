@@ -645,6 +645,9 @@ BOOST_FIXTURE_TEST_CASE(set_producers_test, cyber_govern_tester) try {
     crowd_and_bob.emplace_back(_bob);
     auto crowd_and_user = crowd_of_bps;
     crowd_and_user.emplace_back(user_name(0));
+
+    govern.wait_schedule_activation();
+    BOOST_CHECK_EQUAL(govern.get_active_producers(), govern.make_producers_group(crowd_and_alice));
     
     //start with alice because crowd contained user before an activation of whale
     for (int i = 0; i < 3; i++) {

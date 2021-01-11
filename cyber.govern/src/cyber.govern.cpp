@@ -182,8 +182,7 @@ void govern::propose_producers(structures::state_info& s) {
     }
 
     if ((eosio::current_time_point() - s.last_resize_step.value()).to_seconds() >= schedule_resize_min_delay) {
-        s.required_producers_num = s.last_producers_num;
-        s.required_producers_num++;
+        s.required_producers_num = s.last_producers_num + 1;
         s.required_producers_num = std::min(std::max(s.required_producers_num, min_producers_num), max_producers_num);
         s.last_resize_step.emplace(eosio::current_time_point());
     }
@@ -191,7 +190,7 @@ void govern::propose_producers(structures::state_info& s) {
     auto new_producers = stake::get_top(system_token.code(), s.required_producers_num - active_reserve_producers_num, active_reserve_producers_num);
     auto new_producers_num = new_producers.size();
     
-    auto min_new_producers_num = min_producers_num;
+    auto min_new_producers_num = std::min(s.last_producers_num, min_producers_num);
     if (new_producers_num < min_new_producers_num) {
         return;
     }

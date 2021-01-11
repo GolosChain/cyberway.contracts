@@ -205,24 +205,16 @@ void govern::propose_producers(structures::state_info& s) {
     if (!s.last_resize_step.has_value()) {
         s.last_resize_step.emplace(eosio::current_time_point());
     }
-    if (!s.resize_shift.has_value()) {
-        s.resize_shift.emplace(1);
-    }
 
     if ((eosio::current_time_point() - s.last_resize_step.value()).to_seconds() >= schedule_resize_min_delay) {
-        s.required_producers_num += s.resize_shift.value();
-        s.required_producers_num = std::min(std::max(s.required_producers_num, min_producers_num), max_producers_num);
-        
+        s.required_producers_num = std::min(std::max(s.last_producers_num + 1, min_producers_num), max_producers_num);
         s.last_resize_step.emplace(eosio::current_time_point());
     }
 
     auto new_producers = stake::get_top(system_token.code(), s.required_producers_num - active_reserve_producers_num, active_reserve_producers_num);
     auto new_producers_num = new_producers.size();
     
-    auto min_new_producers_num = s.last_producers_num;
-    if (s.resize_shift.value() < 0) {
-        min_new_producers_num -= std::min<decltype(min_new_producers_num)>(min_new_producers_num, std::abs(s.resize_shift.value()));
-    }
+    auto min_new_producers_num = min_producers_num;
     if (new_producers_num < min_new_producers_num) {
         return;
     }
@@ -256,16 +248,6 @@ int64_t govern::get_target_emission_per_block(int64_t supply) const {
     auto emission_per_year_pct = (((arg * config::emission_factor) / config::_100percent) + config::emission_addition);  
     int64_t emission_per_year = safe_pct(emission_per_year_pct, supply);
     return emission_per_year / config::blocks_per_year;
-}
-
-void govern::setshift(int8_t shift) {
-    eosio::check(schedule_size_shift_min <= shift && shift <= schedule_size_shift_max, "incorrect shift");
-    require_auth(producers_name);
-    auto state = state_singleton(_self, _self.value);
-    auto s = state.get(); // no default values, because it was created on the first block, errors can happens only in tests
-    eosio::check(shift != s.resize_shift.value(), "the shift has not changed");
-    s.resize_shift.emplace(shift);
-    state.set(std::move(s), _self);
 }
 
 void govern::promote_producers(producers& producers_table) {

@@ -71,7 +71,6 @@ struct structures {
 public:
     using contract::contract;
     [[eosio::action]] void onblock(name producer, eosio::binary_extension<uint32_t> schedule_version);
-    [[eosio::action]] void setshift(int8_t shift);
 };
 
 } /// cyber

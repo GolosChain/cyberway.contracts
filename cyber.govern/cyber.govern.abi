@@ -26,11 +26,6 @@
                 {"name": "last_time", "type": "time_point_sec"}
             ]
         }, {
-            "name": "setshift", "base": "", 
-            "fields": [
-                {"name": "shift", "type": "int8"}
-            ]
-        }, {
             "name": "state_info", "base": "", 
             "fields": [
                 {"name": "id", "type": "uint64"}, 
@@ -48,9 +43,8 @@
         }
     ], 
     "actions": [
-        {"name": "onblock", "type": "onblock"}, 
-        {"name": "setshift", "type": "setshift"}
-    ], 
+        {"name": "onblock", "type": "onblock"}
+    ],
     "events": [
         {"name": "burnreward", "type": "balance_struct"}
     ], 

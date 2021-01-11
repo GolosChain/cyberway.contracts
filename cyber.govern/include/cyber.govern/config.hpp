@@ -13,7 +13,7 @@ static const auto rewarded_for_votes_limit_displ = 50;
 
 static const auto schedule_increase_blocking_votes_pct = 90 * _1percent;
 
-static constexpr uint16_t min_producers_num = 21;
+static constexpr uint16_t min_producers_num = 7;
 static constexpr uint16_t max_producers_num = 101;
 
 static const auto schedule_resize_min_delay = 60 * 60 * 24 * 14;

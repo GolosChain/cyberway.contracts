@@ -177,6 +177,9 @@ void govern::propose_producers(structures::state_info& s) {
     if (!s.last_resize_step.has_value()) {
         s.last_resize_step.emplace(eosio::current_time_point());
     }
+    if (!s.resize_shift.has_value()) {
+        s.resize_shift.emplace(1);
+    }
 
     if ((eosio::current_time_point() - s.last_resize_step.value()).to_seconds() >= schedule_resize_min_delay) {
         s.required_producers_num = s.last_producers_num;

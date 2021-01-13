@@ -31,7 +31,7 @@ public:
     
     variant get_state()const {
         auto all = _tester->get_all_chaindb_rows(_code, _code.value, N(governstate), false);
-        BOOST_REQUIRE(all.size() == 1);
+        BOOST_REQUIRE_EQUAL(all.size(), 1);
         return all[0];
     }
 
@@ -93,28 +93,17 @@ public:
         auto prev_block = _tester->control->head_block_num();
         auto prev_block_offset = get_block_offset();
         auto proposed_schedule_block_num = _tester->control->head_block_num() + 1; // see controller.cpp set_proposed_producers
-        
+
         wait_irreversible_block(proposed_schedule_block_num, disabled_producers);
         wait_irreversible_block(_tester->control->head_block_num(), disabled_producers);
-        BOOST_REQUIRE_EQUAL(_tester->control->head_block_header().schedule_version, prev_version);
-        BOOST_REQUIRE_EQUAL(get_block_offset(), prev_block_offset);
-        
-        BOOST_REQUIRE_EQUAL(_tester->control->pending_block_state()->active_schedule.version, prev_version + static_cast<int>(change_version));
+        BOOST_CHECK_EQUAL(_tester->control->head_block_header().schedule_version, prev_version);
+        BOOST_CHECK_EQUAL(get_block_offset(), prev_block_offset);
+
+        BOOST_CHECK_EQUAL(_tester->control->pending_block_state()->active_schedule.version, prev_version + static_cast<int>(change_version));
         auto ret = _tester->control->head_block_num() - prev_block;
         BOOST_TEST_MESSAGE("--- waited " << ret << " more blocks for schedule activation");
         ret += blocks_for_update;
         return ret;
-    }
-    
-    action_result set_shift(int8_t shift) {
-        std::vector<account_name> signers;
-        std::vector<permission_level> perms;
-        for (const auto& k : _tester->control->pending_block_state()->active_schedule.producers) {
-            signers.emplace_back(k.producer_name);
-            perms.emplace_back(permission_level{k.producer_name, config::active_name});
-        }
-        perms.emplace_back(permission_level{config::producers_account_name, config::active_name});
-        return push_msig(N(setshift), perms, signers, args()("shift", shift));
     }
 };
 

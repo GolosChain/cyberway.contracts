@@ -102,30 +102,6 @@ void govern::reward_producers(producers& producers_table, structures::state_info
     unconfirmed_rewards.reserve(config::max_producers_num + 16);
     rewards.reserve(config::max_producers_num + 16);
 
-    // the temporary decision only for the upgrade phase,
-    //   the balances table can be removed after migrating to the producers table
-    boost::container::flat_map<eosio::name, int64_t> old_rewards;
-    balances balances_table(_self, _self.value);
-
-    old_rewards.reserve(config::max_producers_num + 16);
-    for (auto itr = balances_table.begin(); itr != balances_table.end();) {
-        if (itr->amount) {
-            old_rewards.emplace(itr->account, itr->amount);
-        }
-        itr = balances_table.erase(itr);
-    }
-
-    auto get_old_reward = [&](const eosio::name& account) -> int64_t {
-        int64_t amount = 0;
-        auto itr = old_rewards.find(account);
-        if (old_rewards.end() != itr) {
-            amount = itr->second;
-            old_rewards.erase(itr);
-        }
-        return amount;
-    };
-    // end of the temporary decision
-
     auto top = stake::get_top(system_token.code(), s.required_producers_num + rewarded_for_votes_limit_displ, 0);
     int64_t votes_sum = 0;
     for (const auto& t : top) {
@@ -159,7 +135,7 @@ void govern::reward_producers(producers& producers_table, structures::state_info
 
         for (auto& r: unconfirmed_rewards) {
             auto btr = producers_table.find(r.first.value);
-            int64_t amount = get_old_reward(r.first);
+            int64_t amount = 0;
 
             if (btr != producers_table.end()) {
                 producers_table.modify(btr, name(), [&](auto& b) {
@@ -183,14 +159,10 @@ void govern::reward_producers(producers& producers_table, structures::state_info
 
     auto balances_idx = producers_table.get_index<"bybalance"_n>();
     for (auto itr = balances_idx.begin(); itr != balances_idx.end() && itr->amount; ++itr) {
-        rewards.emplace_back(itr->account, itr->amount + get_old_reward(itr->account));
+        rewards.emplace_back(itr->account, itr->amount);
         balances_idx.modify(itr, eosio::same_payer, [&](auto& u){
             u.amount = 0;
         });
-    }
-
-    for (const auto& r: old_rewards) {
-        rewards.emplace_back(r.first, r.second);
     }
 
     if (rewards.size()) {
@@ -210,19 +182,15 @@ void govern::propose_producers(structures::state_info& s) {
     }
 
     if ((eosio::current_time_point() - s.last_resize_step.value()).to_seconds() >= schedule_resize_min_delay) {
-        s.required_producers_num += s.resize_shift.value();
+        s.required_producers_num = s.last_producers_num + 1;
         s.required_producers_num = std::min(std::max(s.required_producers_num, min_producers_num), max_producers_num);
-        
         s.last_resize_step.emplace(eosio::current_time_point());
     }
 
     auto new_producers = stake::get_top(system_token.code(), s.required_producers_num - active_reserve_producers_num, active_reserve_producers_num);
     auto new_producers_num = new_producers.size();
     
-    auto min_new_producers_num = s.last_producers_num;
-    if (s.resize_shift.value() < 0) {
-        min_new_producers_num -= std::min<decltype(min_new_producers_num)>(min_new_producers_num, std::abs(s.resize_shift.value()));
-    }
+    auto min_new_producers_num = std::min(s.last_producers_num, min_producers_num);
     if (new_producers_num < min_new_producers_num) {
         return;
     }
@@ -256,16 +224,6 @@ int64_t govern::get_target_emission_per_block(int64_t supply) const {
     auto emission_per_year_pct = (((arg * config::emission_factor) / config::_100percent) + config::emission_addition);  
     int64_t emission_per_year = safe_pct(emission_per_year_pct, supply);
     return emission_per_year / config::blocks_per_year;
-}
-
-void govern::setshift(int8_t shift) {
-    eosio::check(schedule_size_shift_min <= shift && shift <= schedule_size_shift_max, "incorrect shift");
-    require_auth(producers_name);
-    auto state = state_singleton(_self, _self.value);
-    auto s = state.get(); // no default values, because it was created on the first block, errors can happens only in tests
-    eosio::check(shift != s.resize_shift.value(), "the shift has not changed");
-    s.resize_shift.emplace(shift);
-    state.set(std::move(s), _self);
 }
 
 void govern::promote_producers(producers& producers_table) {

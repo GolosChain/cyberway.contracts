@@ -645,6 +645,9 @@ BOOST_FIXTURE_TEST_CASE(set_producers_test, cyber_govern_tester) try {
     crowd_and_bob.emplace_back(_bob);
     auto crowd_and_user = crowd_of_bps;
     crowd_and_user.emplace_back(user_name(0));
+
+    govern.wait_schedule_activation();
+    BOOST_CHECK_EQUAL(govern.get_active_producers(), govern.make_producers_group(crowd_and_alice));
     
     //start with alice because crowd contained user before an activation of whale
     for (int i = 0; i < 3; i++) {
@@ -786,64 +789,6 @@ BOOST_FIXTURE_TEST_CASE(not_enough_producers_test, cyber_govern_tester) try {
         BOOST_CHECK_EQUAL(govern.get_active_producers(), govern.make_producers_group(cur_pbs));
     }
 
-} FC_LOG_AND_RETHROW()
-
-BOOST_FIXTURE_TEST_CASE(set_shift_test, cyber_govern_tester) try {
-    BOOST_TEST_MESSAGE("schedule_size/set_shift_test");
-    deploy_sys_contracts();
-    
-    reg_candidates(cfg::min_producers_num + 2, 1000);
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num);
-    
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num + 1);
-    
-    BOOST_CHECK_EQUAL(err.incorrect_shift, govern.set_shift(-2));
-    BOOST_CHECK_EQUAL(err.incorrect_shift, govern.set_shift(2));
-    BOOST_CHECK_EQUAL(err.shift_not_changed, govern.set_shift(1));
-    BOOST_CHECK_EQUAL(success(), govern.set_shift(0));
-    
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num + 1);
-    
-    BOOST_CHECK_EQUAL(success(), govern.set_shift(-1));
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num);
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num);
-    
-    BOOST_CHECK_EQUAL(success(), govern.set_shift(1));
-    
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num + 1);
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num + 2);
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num + 2);
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    produce_block(fc::seconds(cfg::schedule_resize_min_delay));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num + 2);
-    
-    BOOST_CHECK_EQUAL(success(), stake.register_candidate(_alice, token._symbol.to_symbol_code()));
-    BOOST_CHECK_EQUAL(success(), stake.register_candidate(_bob, token._symbol.to_symbol_code()));
-    govern.wait_schedule_activation();
-    BOOST_CHECK_EQUAL(govern.get_active_producers().size(), cfg::min_producers_num + 4);
-
-    produce_block();
 } FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE(waiting_test, cyber_govern_tester) try {
